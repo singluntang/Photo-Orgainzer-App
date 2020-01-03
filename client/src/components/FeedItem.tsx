@@ -1,7 +1,8 @@
 import * as React from 'react'
-//import { FeedModel } from '../types/FeedModel'
+import { FeedModel } from '../types/FeedModel'
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThumbsUp } from '@fortawesome/free-solid-svg-icons'
 
 const Card = styled.div`
   background-color: #fff;
@@ -19,8 +20,6 @@ const Card = styled.div`
 const CardHeader = styled.div`
   padding: 26px 20px;
   width: 100%;
-  font-size: 24px;
-  font-family: udagramCardHeader;
 `;
 const CardContent= styled.div`
   padding: 26px 20px;
@@ -29,14 +28,24 @@ const CardContent= styled.div`
 const CardDescription = styled.div`
     padding: 26px 20px;
     width: 100%;
+    font-size: 24px;
+    font-family: udagramCardHeader;
+`;
+const CardFont = styled.div`
+  font-size: 28px;
+  color: grey;
 `;
 const CardFooter = styled.div`
+  display: flex;
+  flex-direction: row;
   padding: 26px 20px;
   width: 100%;
+  font-size: 16px;
+  align-items: center;
 `;
 
 interface FeedCardProps {
-  //Feed: FeedModel
+  feed: FeedModel
 }
 
 
@@ -49,13 +58,18 @@ export class FeedItem extends React.PureComponent<FeedCardProps, FeedCardState> 
     return (
         <Card>
             <CardHeader>
-                Hey guys check out the images, i just brought a new Car!
+                {this.props.feed.title}
             </CardHeader>
             <CardContent>
-                <img src={ require('../car2.jpeg') } width='90%'/>
+                <img src={this.props.feed.imageUrl} width='90%'/>
             </CardContent>            
-            <CardDescription>Hey looks great! hope can have a ride.</CardDescription>
-            <CardFooter></CardFooter>
+            <CardDescription>{this.props.feed.title}</CardDescription>
+            <CardFooter>
+                <CardFont>
+                    <FontAwesomeIcon icon={faThumbsUp} />
+                </CardFont>
+                &nbsp;&nbsp;20 Likes
+            </CardFooter>
         </Card>        
     )
   }

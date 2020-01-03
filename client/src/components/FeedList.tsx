@@ -1,26 +1,31 @@
 import * as React from 'react'
 import styled from 'styled-components';
-//import { FeedModel } from '../types/FeedModel'
+import { FeedModel } from '../types/FeedModel'
 import { FeedItem } from './FeedItem'
-//import { getfeeds } from '../api/feeds-api'
+import { getFeeds } from '../api/feeds-api'
 //import { Card, Button, Divider } from 'semantic-ui-react'
 import { History } from 'history'
 
-const FeedList = styled.div`  
+const FeedListStyle = styled.div`  
   width: 100%;
   display: flex;
   flex-direction: column;
 `;
 
-interface feedsListProps {
+interface FeedsListProps {
   history: History
+  match: {
+    params: {
+      groupId: string
+    }
+  }
 }
 
 interface feedsListState {
-  //feeds: FeedModel[]
+  feeds: FeedModel[]
 }
 
-export class FeedsList extends React.PureComponent<feedsListProps, feedsListState> {
+export default class FeedList extends React.PureComponent<FeedsListProps, feedsListState> {
   state: feedsListState = {
     feeds: []
   }
@@ -31,10 +36,10 @@ export class FeedsList extends React.PureComponent<feedsListProps, feedsListStat
 
   async componentDidMount() {
     try {
-      //const feeds = await getfeeds()
-      //this.setState({
-      //  feeds
-      //})
+      const feeds = await getFeeds(this.props.match.params.groupId)
+      this.setState({
+        feeds
+      })
       console.log("Create Feed")
     } catch (e) {
       alert(`Failed to fetch feeds: ${e.message}`)
@@ -43,9 +48,11 @@ export class FeedsList extends React.PureComponent<feedsListProps, feedsListStat
 
   render() {
     return (
-      <FeedList>
-        <FeedItem />
-      </FeedList>
+      <FeedListStyle>
+        {this.state.feeds.map(feed => {
+            return <FeedItem key={feed.imageId} feed={feed} />
+          })}        
+      </FeedListStyle>
     )
   }
 }

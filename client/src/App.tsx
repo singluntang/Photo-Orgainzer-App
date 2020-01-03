@@ -1,9 +1,10 @@
 import './App.css'
 import React, { Component } from 'react'
-import { FeedsList } from './components/FeedsList'
-import  Header  from './components/Nav'
-import { Router, NavLink , Route, Switch } from 'react-router-dom'
+import FeedList from './components/FeedList'
+import  GroupList  from './components/GroupList'
+import { Router, Link , Route, Switch } from 'react-router-dom'
 import { NotFound } from './components/NotFound'
+import { CreateGroup } from './components/CreateGroup'
 import { CreateFeed } from './components/CreateFeed'
 import Auth from './auth/Auth'
 import styled from 'styled-components';
@@ -12,6 +13,52 @@ const Body = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: right;
+`;
+
+const Nav = styled.div`
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.0975);
+`;
+const NavHeader = styled.div`
+  padding: 26px 20px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+const NavLeft = styled.div`
+  width: 33.333%;
+  text-align: left;
+`;
+const NavCenter = styled.div`
+  width: 33.333%;
+`;
+const Button = styled.button`
+  cursor: pointer;
+  background: transparent;
+  font-size: 16px;
+  border-radius: 3px;
+  color: #5199FF;
+  border: 2px solid #5199FF;
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  transition: 0.5s all ease-out;
+  &:hover {
+    background-color: #5199FF;
+    color: white;
+  }
+`;
+const NavRight = styled.div`
+  width: 33.333%;
+  text-align: right;
+  svg {
+    margin-right: 20px;
+  }
+`;
+const NavLogo = styled(NavLeft)`
+  font-family: udagramLogo;
+  font-size: 48px;
 `;
 
 export interface AppProps {}
@@ -42,7 +89,6 @@ export default class App extends Component<AppProps, AppState> {
   render() {
     return (
           <Body>
-            <span className="fontawesome-like">555555</span>
                 <Router history={this.props.history}>
                   {this.generateMenu()}
 
@@ -54,53 +100,61 @@ export default class App extends Component<AppProps, AppState> {
 
   generateMenu() {
     return (
-      <Header />
+      <Nav>
+          <NavHeader>
+            <NavLeft>
+                <NavLogo>Udagram</NavLogo>
+            </NavLeft>
+            <NavCenter></NavCenter>
+            <NavRight>
+                {this.logInLogOutButton()}
+            </NavRight>
+          </NavHeader>
+      </Nav>
     )
   }
 
   logInLogOutButton() {
     if (this.props.auth.isAuthenticated()) {
       return (
-        <NavLink to="/" onClick={this.handleLogout}>
+        <Button onClick={this.handleLogout}>
           Log Out
-        </NavLink>
+        </Button>
       )
     } else {
       return (
-        <NavLink to="/" onClick={this.handleLogin}>
+        <Button onClick={this.handleLogin}>
           Log In
-        </NavLink >
+        </Button >
       )
     }
   }
 
   generateCurrentPage() {
     return (
-      <React.Fragment>          
-          <Switch>            
-            <Route
-              path="/Feeds/create"
-              exact
-              render={props => {
-                return <CreateFeed {...props} auth={this.props.auth} />
-              }}
-            />
+      <Switch>
+        <Route
+          path="/groups/create"
+          exact
+          render={props => {
+            return <CreateGroup {...props} auth={this.props.auth} />
+          }}
+        />
 
-            <Route path="/feeds/:FeedId" exact component={FeedsList} />
+        <Route path="/feeds/:groupId" exact component={FeedList} />
 
-            <Route
-              path="/feeds/:FeedId/create"
-              exact
-              render={props => {
-                return <CreateFeed {...props} auth={this.props.auth} />
-              }}
-            />
+        <Route
+          path="/feeds/:groupId/create"
+          exact
+          render={props => {
+            return <CreateFeed {...props} auth={this.props.auth} />
+          }}
+        />
 
-            <Route path="/" exact component={FeedsList} />
+        <Route path="/" exact component={GroupList} />
 
-            <Route component={NotFound} />            
-          </Switch>
-      </React.Fragment>          
+        <Route component={NotFound} />
+      </Switch>
     )
   }
 }
