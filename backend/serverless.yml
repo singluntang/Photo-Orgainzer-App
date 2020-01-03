@@ -1,0 +1,399 @@
+service:
+  name: serverless-udagram-app
+
+plugins:
+  - serverless-webpack
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
+  - serverless-plugin-canary-deployments
+  - serverless-iam-roles-per-function
+  - serverless-dynamodb-local
+  - serverless-offline 
+
+package:
+  individually: true   
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+
+  tracing:
+    lambda: true
+    apiGateway: true
+
+  environment:
+    GROUPS_TABLE: Groups-${self:provider.stage}
+    FEEDS_TABLE: Feeds-${self:provider.stage}
+    IMAGE_ID_INDEX: ImageIdIndex
+    CONNECTIONS_TABLE: Connections-${self:provider.stage}
+    IMAGES_S3_BUCKET: serverless-udagram-sing-images-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 300
+    THUMBNAILS_S3_BUCKET: serverless-udagram-sing-thumbnail-${self:provider.stage}
+    IS_OFFLINE: "False"  
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+    - Effect: Allow
+      Action:
+        - codedeploy:*
+      Resource: '*'          
+
+custom: 
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true  
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Udagram API
+        description: Serverless application for images sharing
+    models:
+      - name: GroupRequest
+        contentType: application/json
+        schema: ${file(models/create-group-request.json)}
+      - name: FeedRequest
+        contentType: application/json
+        schema: ${file(models/create-feed-request.json)} 
+  topicName: imagesTopic-${self:provider.stage}    
+  #serverless-offline:
+  #  port: 3003
+  #  babelOptions:
+  #    presets: ["es2015"]    
+  #dynamodb:
+  #  stages:
+  #    - dev    
+  #  start:
+  #    port: 8000
+  #    inMemory: true
+  #    migrate: true       
+
+functions:
+
+  RS256Auth:
+    handler: src/lambda/auth/rs256Auth0Authorizer.handler    
+
+  Auth:  
+    handler: src/lambda/auth/auth0Authorizer.handler
+
+  GetGroups:
+    handler: src/lambda/http/getGroups.handler
+    events:
+      - http:
+          method: get
+          path: groups
+          cors: true
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}     
+
+  CreateGroup:
+    handler: src/lambda/http/createGroup.handler
+    events:
+      - http:
+          method: post
+          path: groups
+          authorizer: RS256Auth
+          cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new group
+            description: Create a new group
+            requestModels:
+              'application/json': GroupRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}              
+    #deploymentSettings:
+    #  type: Linear10PercentEvery1Minute
+    #  alias: Live
+
+  GetFeeds:
+    handler: src/lambda/http/getFeeds.handler
+    events:
+      - http:
+          method: get
+          path: groups/{groupId}/feeds
+          cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}          
+
+  CreateFeed:
+    handler: src/lambda/http/createFeed.handler
+    events:
+      - http:
+          method: post
+          path: groups/{groupId}/feeds
+          authorizer: RS256Auth
+          cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new Feed
+            description: Create a new Feed
+            requestModels:
+              'application/json': FeedRequest        
+
+  SendUploadNotifications:
+    environment:
+      CONNECTIONS_TABLE: Connections-${self:provider.stage}
+      STAGE: ${self:provider.stage}
+      API_ID:
+        Ref: WebsocketsApi
+    handler: src/lambda/s3/sendNotifications.handler  
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ':'
+              - - arn:aws:sns
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${self:custom.topicName}
+          topicName: ${self:custom.topicName}      
+       
+  Resize:           
+    handler: src/lambda/s3/resizeImage.handler
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ':'
+              - - arn:aws:sns
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${self:custom.topicName}
+          topicName: ${self:custom.topicName}   
+
+
+  ConnectHandler:
+    handler: src/lambda/websocket/connect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  DisconnectHandler:
+    handler: src/lambda/websocket/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect      
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    GroupsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.GROUPS_TABLE}
+
+    FeedsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: groupId
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+          - AttributeName: imageId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: groupId
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        TableName: ${self:provider.environment.FEEDS_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.IMAGE_ID_INDEX}
+            KeySchema:
+            - AttributeName: imageId
+              KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    WebSocketConnectionsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.CONNECTIONS_TABLE}
+
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+
+    S3BucketPhotos:
+      Type: AWS::S3::Bucket
+      DependsOn: 
+        - ImagesTopicPolicy    
+      Properties:
+        BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Event: s3:ObjectCreated:Put
+              Topic: 
+                !Ref ImagesTopic                                 
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    SendUploadNotificationsPermissionPhotosS3:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !Ref  SendUploadNotificationsLambdaFunction
+        Principal: s3.amazonaws.com
+        Action: lambda:InvokeFunction
+        SourceAccount: !Ref AWS::AccountId
+        SourceArn: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}                
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 's3:GetObject'
+              Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
+        Bucket: !Ref S3BucketPhotos  
+
+    ResizePhotosBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetResizePhotosBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 
+                - "s3:GetObject"
+                - "s3:PutObject"
+              Resource: 'arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*'
+        Bucket: !Ref S3BucketResizePhotos                    
+
+    S3BucketResizePhotos:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.THUMBNAILS_S3_BUCKET}
+    ResizePermissionResizePhotosS3:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !Ref  ResizeLambdaFunction
+        Principal: s3.amazonaws.com
+        Action: lambda:InvokeFunction
+        SourceAccount: !Ref AWS::AccountId
+        SourceArn: arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}         
+
+    ImagesTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: 'Image bucket topic'
+        TopicName: ${self:custom.topicName}
+
+    ImagesTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      DependsOn:
+        - ImagesTopic      
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: AllowServerlessFrameworkEnterpriseToPublish
+              Effect: Allow
+              Principal:
+                AWS: '*'
+              Action: 'sns:Publish'
+              Resource:
+                Ref: ImagesTopic               
+        Topics:
+          - !Ref ImagesTopic 
