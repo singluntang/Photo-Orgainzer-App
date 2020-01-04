@@ -74,12 +74,7 @@ export default class App extends Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props)
 
-    this.handleLogin = this.handleLogin.bind(this)
     this.handleLogout = this.handleLogout.bind(this)
-  }
-
-  handleLogin() {
-    this.props.auth.login()
   }
 
   handleLogout() {
@@ -120,12 +115,6 @@ export default class App extends Component<AppProps, AppState> {
         <Button onClick={this.handleLogout}>
           Log Out
         </Button>
-      )
-    } else {
-      return (
-        <Button onClick={this.handleLogin}>
-          Log In
-        </Button >
       )
     }
   }

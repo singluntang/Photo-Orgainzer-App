@@ -1,5 +1,5 @@
-//export const apiEndpoint = 'http://localhost:3003'
-export const apiEndpoint = 'https://dc558qdl7b.execute-api.us-east-2.amazonaws.com/dev'
+const apiId = '6qk4cj1xck'
+export const apiEndpoint = `https://${apiId}.execute-api.us-east-2.amazonaws.com/dev`
 
 export const authConfig = {
   domain: 'dev-rs5nalxx.auth0.com',

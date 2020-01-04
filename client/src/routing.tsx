@@ -3,7 +3,7 @@ import Auth from './auth/Auth'
 import { Router, Route } from 'react-router-dom'
 import Callback from './components/Callback'
 const createHistory = require("history")
-import App from './App';
+import Login from '../src/components/Login';
 
 const history = createHistory.createBrowserHistory()
 
@@ -29,7 +29,7 @@ export const makeAuthRouting = () => {
         />
         <Route
           render={props => {
-            return <App auth={auth} {...props} />
+            return <Login auth={auth} {...props} />
           }}
         />
       </div>
