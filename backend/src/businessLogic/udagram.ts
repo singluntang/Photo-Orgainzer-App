@@ -2,8 +2,7 @@ import * as uuid from 'uuid'
 
 import { Group } from '../models/Group'
 import { Feed } from '../models/Feed'
-import { GroupAccess, createFeed, getUploadUrl } from '../dataLayer/groupsAccess'
-import { CreateGroupRequest } from '../requests/CreateGroupRequest'
+import { GroupAccess } from '../dataLayer/groupsAccess'
 import { CreateFeedRequest } from '../requests/CreateFeedRequest'
 
 
@@ -17,27 +16,21 @@ export async function getGroupFeeds(groupId: string): Promise<Feed[]> {
   return groupAccess.getGroupFeeds(groupId)
 }
 
+export async function processImage(Key) {  
+  await groupAccess.processFeedImage(Key)
+}
 
 export function getUploadUrl(imageUrl: string): any {
   return groupAccess.getUploadUrl(imageUrl)
 }
 
-export async function groupExists(groupId: string): Promise<boolean> {
-  return groupAccess.groupExists(groupId)
+export async function attachUrlToImage(uploadUrl, imageId) {  
+  await groupAccess.attachUrlToImage(uploadUrl, imageId)
 }
 
 
-export async function createGroup(
-  createGroupRequest: CreateGroupRequest
-): Promise<Group> {
-
-  const itemId = uuid.v4()
-
-  return await groupAccess.createGroup({
-    id: itemId,
-    name: createGroupRequest.name,
-    description: createGroupRequest.description
-  })
+export async function createGroup(): Promise<boolean> {
+  return await groupAccess.createGroup()
 }
 
 export async function createFeed(

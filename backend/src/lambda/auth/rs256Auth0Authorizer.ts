@@ -1,35 +1,20 @@
-
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import 'source-map-support/register'
+import { verify, decode } from 'jsonwebtoken'
+import { createLogger } from '../../utils/logger'
+import { JwtPayload } from '../../auth/JwtPayload'
+import { certToPEM } from '../utils'
+const logger = createLogger('auth')
+const axios = require('axios');
 
-import { verify } from 'jsonwebtoken'
-import { JwtToken } from '../../auth/JwtToken'
-
-
-const cert = `-----BEGIN CERTIFICATE-----
-MIIDBzCCAe+gAwIBAgIJeDILzE/4wcrKMA0GCSqGSIb3DQEBCwUAMCExHzAdBgNV
-BAMTFmRldi1yczVuYWx4eC5hdXRoMC5jb20wHhcNMTkxMjA5MDI1NDUzWhcNMzMw
-ODE3MDI1NDUzWjAhMR8wHQYDVQQDExZkZXYtcnM1bmFseHguYXV0aDAuY29tMIIB
-IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs3USl/wBkpjJTE8lP2PDI4zs
-JEX8hUm0xUW/WaU1e0XbZVNfstQo7JxaEXJBrCuNcv1o7AbO0Ylfa8JcupZTPp8Q
-c6DiJt4OZur7ENKpQs6hsb6wlF3t/0QWdodQmbHS4MwL1wSFnqFWFe2Xp8ja+t+F
-wLltKswhafS/qbaTHO7HWdE5LBDeBaowpa5wtbqtkca7590xOxyV4dGXDSoUzyEY
-kYIr1pt/mzc7Tr68DspY9BSNeguWseepw3kNxwYPnqkCGOQCFvX1+sKlQOiI/aSp
-EnmX+r0cE7lHyScvFx4zROwPJFSRaTAhp29foIQ0tt4QGPHiqqmvcVrqL8+rMwID
-AQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBRun632VkgBP3LSSez5
-7GNAudef3zAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQELBQADggEBAHsOcg3w
-tMuqCszs4IRwCh/B/WiRetbSivYyXz6gwnEFx1fPtVb6U5RYcgHzUIApUbp2zQhP
-1JefX3aytqBik6xhFrNvK9s9u70nCxrgbHp9z9PbhY3/EStw9iY7SuZSAyf5+6gB
-IeVJqsuHu06+W1wiIotbGHmmZAWjI7Sad7RTeCARXt3lgpc8lZv8jrNcXuTM8tHG
-GasWjUcX2d9adG5lPxeVpETZni6E34svE2GjXgkCmI+pZz5Pvq43E1ofzAOSPp1Q
-X/4fQ/WTR+CT7vEg+wPUrC8/ps44K1TWF5naMkk2ENdNt9XfzhiftmcWwQsl6pUA
-v2CycNN53PiKBik=
------END CERTIFICATE-----`
+const jwksUrl = 'https://dev-rs5nalxx.auth0.com/.well-known/jwks.json'
+                   
 
 export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> => {
   try {
-    const jwtToken = verifyToken(event.authorizationToken)
-    console.log('User was authorized', jwtToken)
+    const jwtToken = await verifyToken(event.authorizationToken)
+
+    logger.info('User Authorized', jwtToken.sub)
 
     return {
       principalId: jwtToken.sub,
@@ -45,7 +30,6 @@ export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAutho
       }
     }
   } catch (e) {
-    console.log('User authorized', e.message)
 
     return {
       principalId: 'user',
@@ -63,9 +47,40 @@ export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAutho
   }
 }
 
-function verifyToken(authHeader: string): JwtToken {
-  if (!authHeader)
-    throw new Error('No authentication header')
+async function verifyToken(authHeader: string): Promise<JwtPayload> {
+  const token = getToken(authHeader)
+  const jwt: JwtPayload = decode(token, { complete: true }) as JwtPayload
+
+  logger.info('JWT', jwt)
+
+  const response: any = await axios.get(jwksUrl, {headers: {
+                  'Content-Type': 'application/json'
+                }})
+
+  var jwks = response.data.keys;                
+
+  //logger.info('jwks: ', jwks)
+
+  const signingKeys = jwks
+  .filter(key => key.use === 'sig' // JWK property `use` determines the JWK is for signing
+              && key.kty === 'RSA' // We are only supporting RSA (RS256)
+              && key.kid           // The `kid` must be present to be useful for later
+              && ((key.x5c && key.x5c.length) || (key.n && key.e)) // Has useful public keys
+  ).map(key => {
+    return { kid: key.kid, nbf: key.nbf, publicKey: certToPEM(key.x5c[0]) };
+  });
+
+  //logger.info('signingKeys: ', signingKeys)
+ 
+  const cert = signingKeys[0].publicKey
+
+  logger.info('Cert', cert)
+
+  return verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload
+}
+
+function getToken(authHeader: string): string {
+  if (!authHeader) throw new Error('No authentication header')
 
   if (!authHeader.toLowerCase().startsWith('bearer '))
     throw new Error('Invalid authentication header')
@@ -73,5 +88,6 @@ function verifyToken(authHeader: string): JwtToken {
   const split = authHeader.split(' ')
   const token = split[1]
 
-  return verify(token, cert, { algorithms: ['RS256'] }) as JwtToken
+  return token
 }
+

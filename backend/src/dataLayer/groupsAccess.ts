@@ -2,9 +2,11 @@ import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 var AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS)
-
 import { Group } from '../models/Group'
 import { Feed } from '../models/Feed'
+import { createLogger } from '../utils/logger'
+import Jimp from 'jimp';
+const logger = createLogger('groupAcess')
 
 
 export class GroupAccess {
@@ -14,28 +16,79 @@ export class GroupAccess {
     private readonly groupsTable = process.env.GROUPS_TABLE, 
     private readonly feedsTable = process.env.FEEDS_TABLE,
     private readonly bucketName = process.env.IMAGES_S3_BUCKET,
+    private readonly thumbnailBucketName = process.env.THUMBNAILS_S3_BUCKET,
+    private readonly region = process.env.BUCKET_REGION,
     private readonly urlExpiration: number = parseInt(process.env.SIGNED_URL_EXPIRATION))    
         
     {}
 
-  async getAllGroups(): Promise<Group[]> {
-    console.log('Getting all groups')
+    async createGroup(): Promise<boolean> {
 
+      let error: boolean = false;
+
+      this.docClient.batchWrite({
+        RequestItems: {
+          'Groups-dev': [
+            {
+              PutRequest: {
+                Item: {
+                  "id": "1",
+                  "name": "Dogs",
+                  "description": "Only dog images here!"
+                }
+              }
+            },
+            {
+              PutRequest: {
+                Item: {
+                  "id": "2",
+                  "name": "Nature",
+                  "description": "What can be a better object for photography"
+                }
+              }
+            },
+            {
+              PutRequest: {
+                Item: {
+                  "id": "3",
+                  "name": "Cities",
+                  "description": "Creative display of urban settings"
+                }
+              }
+            },
+            {
+              PutRequest: {
+                Item: {
+                  "id": "4",
+                  "name": "Computers",
+                  "description": "For the techies among us"
+                }
+              }
+            },
+          ]
+        }
+      }).promise()
+      .then(() => {
+        logger.info('Items added', '')
+      })
+      .catch((e) => {
+        logger.info('Failed', e.message) 
+        error = true
+      })
+
+      return error
+    }    
+
+  async getAllGroups(): Promise<Group[]> {
     const result = await this.docClient.scan({
       TableName: this.groupsTable
     }).promise()
 
     const items = result.Items
+
+    logger.info('Getting groups', items) 
+
     return items as Group[]
-  }
-
-  async createGroup(group: Group): Promise<Group> {
-    await this.docClient.put({
-      TableName: this.groupsTable,
-      Item: group
-    }).promise()
-
-    return group
   }
 
   async createFeed(feed: Feed): Promise<Feed> {
@@ -73,27 +126,68 @@ export class GroupAccess {
       Key: imageId,
       Expires: this.urlExpiration
     })
-  }  
+  }
+  
+  async attachUrlToImage(uploadUrl: string, imageId: string) {
 
-  async groupExists(groupId: string): Promise<boolean> {
-    const result = await this.docClient
-      .get({
-        TableName: this.groupsTable,
-        Key: {
-          id: groupId
-        }
+    const params = {
+      TableName: this.feedsTable,
+      Key:{
+          "imageId": imageId
+      },
+      ConditionExpression:"imageId = :imageId",
+      UpdateExpression: "set attachmentUrl = :r",     
+      ExpressionAttributeValues:{
+          ":imageId":imageId,
+          ":r":uploadUrl
+      },
+    };
+
+    await this.docClient.update(params).promise();
+ 
+  }
+
+  async processFeedImage(key: string) {
+
+    console.log('Processing S3 item with key: ', key)
+    const s3 = new XAWS.S3({
+      signatureVersion: 'v4',
+      region: this.region,
+      params: {Bucket: this.bucketName}
+    });  
+  
+    const response = await s3
+      .getObject({
+        Bucket: this.bucketName,
+        Key: key
+      })
+      .promise()  
+  
+    const body = response.Body
+    const image = await Jimp.read(body)
+  
+    logger.info('Buffer',image)
+  
+    image.resize(150, Jimp.AUTO)
+    const convertedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
+  
+    logger.info('Writing image back to S3 bucket', this.thumbnailBucketName)
+    await s3
+      .putObject({
+        Bucket: this.thumbnailBucketName,
+        Key: `${key}.jpeg`,
+        Body: convertedBuffer
       })
       .promise()
   
-    console.log('Get group: ', result)
-    return !!result.Item
-  }  
+  }
+
+
 }
 
-
-function createDynamoDBClient() {
+  function createDynamoDBClient() {
   if (process.env.IS_OFFLINE === "True") {
-    console.log('Creating a local DynamoDB instance')
+    logger.info('Creating a local DynamoDB instance', '')
     return new XAWS.DynamoDB.DocumentClient({
       region: 'localhost',
       endpoint: 'http://localhost:8000'

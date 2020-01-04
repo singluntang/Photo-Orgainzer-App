@@ -1,14 +1,18 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 import 'source-map-support/register'
 import { getGroupFeeds } from '../../businessLogic/udagram';
+import { createLogger } from '../../utils/logger'
 
+const logger = createLogger('getFeeds')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Caller event', event)
+  logger.info('Caller event', event)
   const groupId = event.pathParameters.groupId
 
-  const groups = await getGroupFeeds(groupId)
-  let result = JSON.parse(JSON.stringify(groups))
+  const feeds = await getGroupFeeds(groupId)
+  let result = JSON.parse(JSON.stringify(feeds))
+
+  logger.info('Get Feed', result)
 
   if (result.Count !== 0) {
     return {
