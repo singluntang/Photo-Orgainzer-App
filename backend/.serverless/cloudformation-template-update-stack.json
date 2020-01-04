@@ -62,22 +62,10 @@
         "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-RS256Auth"
       }
     },
-    "AuthLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-Auth"
-      }
-    },
     "GetGroupsLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
         "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-GetGroups"
-      }
-    },
-    "CreateGroupLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-CreateGroup"
       }
     },
     "GetFeedsLogGroup": {
@@ -86,34 +74,16 @@
         "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-GetFeeds"
       }
     },
-    "CreateFeedsLogGroup": {
+    "CreateFeedLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-CreateFeeds"
-      }
-    },
-    "SendUploadNotificationsLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-SendUploadNotifications"
+        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-CreateFeed"
       }
     },
     "ResizeLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
         "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-Resize"
-      }
-    },
-    "ConnectHandlerLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-ConnectHandler"
-      }
-    },
-    "DisconnectHandlerLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/serverless-udagram-app-dev-DisconnectHandler"
       }
     },
     "IamRoleLambdaExecution": {
@@ -175,27 +145,10 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                    "dynamodb:Scan",
-                    "dynamodb:PutItem",
-                    "dynamodb:GetItem"
+                    "s3:PutObject",
+                    "s3:GetObject"
                   ],
-                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Groups-dev"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:PutItem",
-                    "dynamodb:Query",
-                    "dynamodb:Scan"
-                  ],
-                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:Query"
-                  ],
-                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev/index/ImageIdIndex"
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
                 },
                 {
                   "Effect": "Allow",
@@ -208,18 +161,11 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                    "s3:PutObject"
+                    "xray:PutTraceSegments"
                   ],
-                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:Scan",
-                    "dynamodb:PutItem",
-                    "dynamodb:DeleteItem"
-                  ],
-                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Connections-dev"
+                  "Resource": [
+                    "*"
+                  ]
                 },
                 {
                   "Effect": "Allow",
@@ -236,15 +182,6 @@
                   ],
                   "Resource": [
                     "*"
-                  ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "execute-api:ManageConnections"
-                  ],
-                  "Resource": [
-                    "arn:aws:execute-api:*:*:*/@connections/*"
                   ]
                 }
               ]
@@ -274,7 +211,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/RS256Auth.zip"
+          "S3Key": "serverless/serverless-udagram-app/dev/1578143467772-2020-01-04T13:11:07.772Z/RS256Auth.zip"
         },
         "FunctionName": "serverless-udagram-app-dev-RS256Auth",
         "Handler": "src/lambda/auth/rs256Auth0Authorizer.handler",
@@ -299,6 +236,7 @@
             "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
             "SIGNED_URL_EXPIRATION": 300,
             "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
+            "BUCKET_REGION": "us-east-2",
             "IS_OFFLINE": "False"
           }
         }
@@ -308,65 +246,14 @@
         "IamRoleLambdaExecution"
       ]
     },
-    "RS256AuthLambdaVersionUi0AyobyjQFD1FqW48YE4TCW9apXi6YhrUAAJ4wOY": {
+    "RS256AuthLambdaVersionuU48sesJ7XMIrUEjeqZDInyqTo5yKwzODqg9zZzqA": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RS256AuthLambdaFunction"
         },
-        "CodeSha256": "o+qmNvOyMR0kvgjucgxiTfe20YFgcOPiTKWK5kf37R0="
-      }
-    },
-    "AuthLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/Auth.zip"
-        },
-        "FunctionName": "serverless-udagram-app-dev-Auth",
-        "Handler": "src/lambda/auth/auth0Authorizer.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs8.10",
-        "Timeout": 6,
-        "TracingConfig": {
-          "Mode": "Active"
-        },
-        "Environment": {
-          "Variables": {
-            "GROUPS_TABLE": "Groups-dev",
-            "FEEDS_TABLE": "Feeds-dev",
-            "IMAGE_ID_INDEX": "ImageIdIndex",
-            "CONNECTIONS_TABLE": "Connections-dev",
-            "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
-            "SIGNED_URL_EXPIRATION": 300,
-            "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
-            "IS_OFFLINE": "False"
-          }
-        }
-      },
-      "DependsOn": [
-        "AuthLogGroup",
-        "IamRoleLambdaExecution"
-      ]
-    },
-    "AuthLambdaVersiondxYsTipNiKgibgdZXun2JMPhOZI0J9CtK7rRclC7Kg": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "AuthLambdaFunction"
-        },
-        "CodeSha256": "673aO0wGiGqYWxnRLiykBdfW13QqVZFmPzZkvH9PqTw="
+        "CodeSha256": "oB8pbCEp4v9k8HHcvuNapBlqkWV4YbYQKqICHgqnQxk="
       }
     },
     "GetGroupsLambdaFunction": {
@@ -376,14 +263,14 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/GetGroups.zip"
+          "S3Key": "serverless/serverless-udagram-app/dev/1578143467772-2020-01-04T13:11:07.772Z/GetGroups.zip"
         },
         "FunctionName": "serverless-udagram-app-dev-GetGroups",
         "Handler": "src/lambda/http/getGroups.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
+            "GetGroupsIamRoleLambdaExecution",
             "Arn"
           ]
         },
@@ -401,74 +288,24 @@
             "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
             "SIGNED_URL_EXPIRATION": 300,
             "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
+            "BUCKET_REGION": "us-east-2",
             "IS_OFFLINE": "False"
           }
         }
       },
       "DependsOn": [
-        "GetGroupsLogGroup",
-        "IamRoleLambdaExecution"
+        "GetGroupsIamRoleLambdaExecution",
+        "GetGroupsLogGroup"
       ]
     },
-    "GetGroupsLambdaVersionS9KX5gwiNHqSv0KFEoUBfFAmLR13G946MtMXyvTuo": {
+    "GetGroupsLambdaVersionz67t4JPAedscy2LVY8B0kINbxnRKXJUXQ8UaHKWqM": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetGroupsLambdaFunction"
         },
-        "CodeSha256": "1HrjGZpOUMh/k2dXjjzSOz0qwnUs53wFd8GEekuM4vk="
-      }
-    },
-    "CreateGroupLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/CreateGroup.zip"
-        },
-        "FunctionName": "serverless-udagram-app-dev-CreateGroup",
-        "Handler": "src/lambda/http/createGroup.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs8.10",
-        "Timeout": 6,
-        "TracingConfig": {
-          "Mode": "Active"
-        },
-        "Environment": {
-          "Variables": {
-            "GROUPS_TABLE": "Groups-dev",
-            "FEEDS_TABLE": "Feeds-dev",
-            "IMAGE_ID_INDEX": "ImageIdIndex",
-            "CONNECTIONS_TABLE": "Connections-dev",
-            "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
-            "SIGNED_URL_EXPIRATION": 300,
-            "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
-            "IS_OFFLINE": "False"
-          }
-        }
-      },
-      "DependsOn": [
-        "CreateGroupLogGroup",
-        "IamRoleLambdaExecution"
-      ]
-    },
-    "CreateGroupLambdaVersionUCLANcLJ6aqPwtPN7EtSB5ciqAXfs8de80JT0YFyDE": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "CreateGroupLambdaFunction"
-        },
-        "CodeSha256": "RtfdUockJ0WWqjRm41r+qJrj858fuKG7qswPnLorG6o="
+        "CodeSha256": "VERmODX8kEfnPbRXZR4JbeTU3263n5X0ZyelnilRTrY="
       }
     },
     "GetFeedsLambdaFunction": {
@@ -478,7 +315,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/GetFeeds.zip"
+          "S3Key": "serverless/serverless-udagram-app/dev/1578143467772-2020-01-04T13:11:07.772Z/GetFeeds.zip"
         },
         "FunctionName": "serverless-udagram-app-dev-GetFeeds",
         "Handler": "src/lambda/http/getFeeds.handler",
@@ -503,6 +340,7 @@
             "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
             "SIGNED_URL_EXPIRATION": 300,
             "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
+            "BUCKET_REGION": "us-east-2",
             "IS_OFFLINE": "False"
           }
         }
@@ -512,31 +350,31 @@
         "GetFeedsLogGroup"
       ]
     },
-    "GetFeedsLambdaVersionUxworBLldvRy92kWC9RcH8WbEFXyG8a7DfGDtY6XY": {
+    "GetFeedsLambdaVersionlgkwTa9FLXjzwwXT9FVqQQrnIUXZz2UGcgCComV6f9E": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetFeedsLambdaFunction"
         },
-        "CodeSha256": "P8ZF65c+tqwZEpumGNxI304yweSY0QIThpA0W7ZBWRg="
+        "CodeSha256": "GhzySe8tu20ce/setP6AfdMmXHG2vYJFef3HMCbFFaw="
       }
     },
-    "CreateFeedsLambdaFunction": {
+    "CreateFeedLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/CreateFeeds.zip"
+          "S3Key": "serverless/serverless-udagram-app/dev/1578143467772-2020-01-04T13:11:07.772Z/CreateFeed.zip"
         },
-        "FunctionName": "serverless-udagram-app-dev-CreateFeeds",
-        "Handler": "src/lambda/http/createFeeds.handler",
+        "FunctionName": "serverless-udagram-app-dev-CreateFeed",
+        "Handler": "src/lambda/http/createFeed.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
+            "CreateFeedIamRoleLambdaExecution",
             "Arn"
           ]
         },
@@ -554,78 +392,24 @@
             "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
             "SIGNED_URL_EXPIRATION": 300,
             "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
+            "BUCKET_REGION": "us-east-2",
             "IS_OFFLINE": "False"
           }
         }
       },
       "DependsOn": [
-        "CreateFeedsLogGroup",
-        "IamRoleLambdaExecution"
+        "CreateFeedIamRoleLambdaExecution",
+        "CreateFeedLogGroup"
       ]
     },
-    "CreateFeedsLambdaVersionRIw9FO2jIxK6u3QOgVSvxVmaEZyM2shbi8tcunrc5Q": {
+    "CreateFeedLambdaVersionugX3VFPkPeS8mzZffmCWpIYAer66zFDXTrUbBcB0X4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "CreateFeedsLambdaFunction"
+          "Ref": "CreateFeedLambdaFunction"
         },
-        "CodeSha256": "xYh58qGIvKDisQfEcOR9Xj2zqVx358jnDnzkJN+b4Yo="
-      }
-    },
-    "SendUploadNotificationsLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/SendUploadNotifications.zip"
-        },
-        "FunctionName": "serverless-udagram-app-dev-SendUploadNotifications",
-        "Handler": "src/lambda/s3/sendNotifications.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs8.10",
-        "Timeout": 6,
-        "TracingConfig": {
-          "Mode": "Active"
-        },
-        "Environment": {
-          "Variables": {
-            "GROUPS_TABLE": "Groups-dev",
-            "FEEDS_TABLE": "Feeds-dev",
-            "IMAGE_ID_INDEX": "ImageIdIndex",
-            "CONNECTIONS_TABLE": "Connections-dev",
-            "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
-            "SIGNED_URL_EXPIRATION": 300,
-            "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
-            "IS_OFFLINE": "False",
-            "STAGE": "dev",
-            "API_ID": {
-              "Ref": "WebsocketsApi"
-            }
-          }
-        }
-      },
-      "DependsOn": [
-        "SendUploadNotificationsLogGroup",
-        "IamRoleLambdaExecution"
-      ]
-    },
-    "SendUploadNotificationsLambdaVersionuuzqilBcYDFNHoziTbU2hXwazOsCrHFX4KPUqA": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "SendUploadNotificationsLambdaFunction"
-        },
-        "CodeSha256": "sD0NeKjIu0ES36CJ/OtzAvUwWAiibmkkBfZIMwzGLJU="
+        "CodeSha256": "jr3tIaWfrxxqUAyDBXKiszxuWQ94OSYYRm742755RmA="
       }
     },
     "ResizeLambdaFunction": {
@@ -635,14 +419,14 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/Resize.zip"
+          "S3Key": "serverless/serverless-udagram-app/dev/1578143467772-2020-01-04T13:11:07.772Z/Resize.zip"
         },
         "FunctionName": "serverless-udagram-app-dev-Resize",
         "Handler": "src/lambda/s3/resizeImage.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
+            "ResizeIamRoleLambdaExecution",
             "Arn"
           ]
         },
@@ -660,125 +444,24 @@
             "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
             "SIGNED_URL_EXPIRATION": 300,
             "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
+            "BUCKET_REGION": "us-east-2",
             "IS_OFFLINE": "False"
           }
         }
       },
       "DependsOn": [
-        "ResizeLogGroup",
-        "IamRoleLambdaExecution"
+        "ResizeIamRoleLambdaExecution",
+        "ResizeLogGroup"
       ]
     },
-    "ResizeLambdaVersionxwahoJBfAkLdomuqOXlQpNbq2b2r9ugwZCTnJqFsjaI": {
+    "ResizeLambdaVersionXVqIXZgNJPAS1YcBECUgL4U5lPicPAx1Gn9GnEbT8gQ": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ResizeLambdaFunction"
         },
-        "CodeSha256": "tOAt504PC8S8l0U0POpn6rU6fyjA5Wuw0x6qsdQY5NU="
-      }
-    },
-    "ConnectHandlerLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/ConnectHandler.zip"
-        },
-        "FunctionName": "serverless-udagram-app-dev-ConnectHandler",
-        "Handler": "src/lambda/websocket/connect.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs8.10",
-        "Timeout": 6,
-        "TracingConfig": {
-          "Mode": "Active"
-        },
-        "Environment": {
-          "Variables": {
-            "GROUPS_TABLE": "Groups-dev",
-            "FEEDS_TABLE": "Feeds-dev",
-            "IMAGE_ID_INDEX": "ImageIdIndex",
-            "CONNECTIONS_TABLE": "Connections-dev",
-            "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
-            "SIGNED_URL_EXPIRATION": 300,
-            "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
-            "IS_OFFLINE": "False"
-          }
-        }
-      },
-      "DependsOn": [
-        "ConnectHandlerLogGroup",
-        "IamRoleLambdaExecution"
-      ]
-    },
-    "ConnectHandlerLambdaVersioniI4NUgrDK2DH51tDmDjxWmuVEmnmvoPYEW2tntVm8": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "ConnectHandlerLambdaFunction"
-        },
-        "CodeSha256": "yA2hm5LWUgRUK3IAutG7OATojF265MoC2xXN8z//+Xo="
-      }
-    },
-    "DisconnectHandlerLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "ServerlessDeploymentBucket"
-          },
-          "S3Key": "serverless/serverless-udagram-app/dev/1578022968767-2020-01-03T03:42:48.767Z/DisconnectHandler.zip"
-        },
-        "FunctionName": "serverless-udagram-app-dev-DisconnectHandler",
-        "Handler": "src/lambda/websocket/disconnect.handler",
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs8.10",
-        "Timeout": 6,
-        "TracingConfig": {
-          "Mode": "Active"
-        },
-        "Environment": {
-          "Variables": {
-            "GROUPS_TABLE": "Groups-dev",
-            "FEEDS_TABLE": "Feeds-dev",
-            "IMAGE_ID_INDEX": "ImageIdIndex",
-            "CONNECTIONS_TABLE": "Connections-dev",
-            "IMAGES_S3_BUCKET": "serverless-udagram-sing-images-dev",
-            "SIGNED_URL_EXPIRATION": 300,
-            "THUMBNAILS_S3_BUCKET": "serverless-udagram-sing-thumbnail-dev",
-            "IS_OFFLINE": "False"
-          }
-        }
-      },
-      "DependsOn": [
-        "DisconnectHandlerLogGroup",
-        "IamRoleLambdaExecution"
-      ]
-    },
-    "DisconnectHandlerLambdaVersionYlPdjvelU6oSy6TDNPskOA14dw63Z9ecGK5jGex4": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "DisconnectHandlerLambdaFunction"
-        },
-        "CodeSha256": "F1vN4kwKo2S/7thHmqsAzjbebCY6eJeCq4miMp3qCH8="
+        "CodeSha256": "efEcUxJbfr8xgPIc3cCll7WlEi9Ry+CrJKPknRB/F2s="
       }
     },
     "ApiGatewayRestApi": {
@@ -860,7 +543,7 @@
               "ResponseParameters": {
                 "method.response.header.Access-Control-Allow-Origin": "'*'",
                 "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST,GET'"
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
               },
               "ResponseTemplates": {
                 "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".*\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
@@ -964,61 +647,6 @@
         "MethodResponses": []
       }
     },
-    "ApiGatewayMethodGroupsPost": {
-      "Type": "AWS::ApiGateway::Method",
-      "Properties": {
-        "HttpMethod": "POST",
-        "RequestParameters": {},
-        "ResourceId": {
-          "Ref": "ApiGatewayResourceGroups"
-        },
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        },
-        "ApiKeyRequired": false,
-        "AuthorizationType": "CUSTOM",
-        "AuthorizerId": {
-          "Ref": "RS256AuthApiGatewayAuthorizer"
-        },
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "CreateGroupLambdaFunction",
-                    "Arn"
-                  ]
-                },
-                "/invocations"
-              ]
-            ]
-          }
-        },
-        "MethodResponses": [],
-        "RequestValidatorId": {
-          "Ref": "RequestBodyValidator"
-        },
-        "RequestModels": {
-          "application/json": "GroupRequest"
-        }
-      },
-      "DependsOn": [
-        "GroupRequestModel"
-      ]
-    },
     "ApiGatewayMethodGroupsGroupidVarFeedsGet": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
@@ -1096,7 +724,7 @@
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "CreateFeedsLambdaFunction",
+                    "CreateFeedLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -1151,7 +779,7 @@
         "Type": "TOKEN"
       }
     },
-    "ApiGatewayDeployment1578022789553": {
+    "ApiGatewayDeployment1578143403663": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -1163,7 +791,6 @@
         "ApiGatewayMethodGroupsOptions",
         "ApiGatewayMethodGroupsGroupidVarFeedsOptions",
         "ApiGatewayMethodGroupsGet",
-        "ApiGatewayMethodGroupsPost",
         "ApiGatewayMethodGroupsGroupidVarFeedsGet",
         "ApiGatewayMethodGroupsGroupidVarFeedsPost"
       ]
@@ -1205,12 +832,49 @@
         }
       }
     },
-    "CreateGroupLambdaPermissionApiGateway": {
+    "GetFeedsLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "CreateGroupLambdaFunction",
+            "GetFeedsLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "CreateFeedLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CreateFeedLambdaFunction",
             "Arn"
           ]
         },
@@ -1253,310 +917,6 @@
         },
         "Action": "lambda:InvokeFunction",
         "Principal": "apigateway.amazonaws.com"
-      }
-    },
-    "GetFeedsLambdaPermissionApiGateway": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "GetFeedsLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
-              {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "/*/*"
-            ]
-          ]
-        }
-      }
-    },
-    "CreateFeedsLambdaPermissionApiGateway": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "CreateFeedsLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
-              {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "/*/*"
-            ]
-          ]
-        }
-      }
-    },
-    "WebsocketsApi": {
-      "Type": "AWS::ApiGatewayV2::Api",
-      "Properties": {
-        "Name": "dev-serverless-udagram-app-websockets",
-        "RouteSelectionExpression": "$request.body.action",
-        "Description": "Serverless Websockets",
-        "ProtocolType": "WEBSOCKET"
-      }
-    },
-    "ConnectHandlerWebsocketsIntegration": {
-      "Type": "AWS::ApiGatewayV2::Integration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "IntegrationType": "AWS_PROXY",
-        "IntegrationUri": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":apigateway:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":lambda:path/2015-03-31/functions/",
-              {
-                "Fn::GetAtt": [
-                  "ConnectHandlerLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "/invocations"
-            ]
-          ]
-        }
-      }
-    },
-    "DisconnectHandlerWebsocketsIntegration": {
-      "Type": "AWS::ApiGatewayV2::Integration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "IntegrationType": "AWS_PROXY",
-        "IntegrationUri": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":apigateway:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":lambda:path/2015-03-31/functions/",
-              {
-                "Fn::GetAtt": [
-                  "DisconnectHandlerLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "/invocations"
-            ]
-          ]
-        }
-      }
-    },
-    "ConnectHandlerLambdaPermissionWebsockets": {
-      "Type": "AWS::Lambda::Permission",
-      "DependsOn": [
-        "WebsocketsApi",
-        "ConnectHandlerLambdaFunction"
-      ],
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "ConnectHandlerLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com"
-      }
-    },
-    "DisconnectHandlerLambdaPermissionWebsockets": {
-      "Type": "AWS::Lambda::Permission",
-      "DependsOn": [
-        "WebsocketsApi",
-        "DisconnectHandlerLambdaFunction"
-      ],
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "DisconnectHandlerLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com"
-      }
-    },
-    "SconnectWebsocketsRoute": {
-      "Type": "AWS::ApiGatewayV2::Route",
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "RouteKey": "$connect",
-        "AuthorizationType": "NONE",
-        "Target": {
-          "Fn::Join": [
-            "/",
-            [
-              "integrations",
-              {
-                "Ref": "ConnectHandlerWebsocketsIntegration"
-              }
-            ]
-          ]
-        }
-      }
-    },
-    "SdisconnectWebsocketsRoute": {
-      "Type": "AWS::ApiGatewayV2::Route",
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "RouteKey": "$disconnect",
-        "AuthorizationType": "NONE",
-        "Target": {
-          "Fn::Join": [
-            "/",
-            [
-              "integrations",
-              {
-                "Ref": "DisconnectHandlerWebsocketsIntegration"
-              }
-            ]
-          ]
-        }
-      }
-    },
-    "WebsocketsDeployment1578022789553": {
-      "Type": "AWS::ApiGatewayV2::Deployment",
-      "DependsOn": [
-        "SconnectWebsocketsRoute",
-        "SdisconnectWebsocketsRoute"
-      ],
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "Description": "Serverless Websockets"
-      }
-    },
-    "WebsocketsDeploymentStage": {
-      "Type": "AWS::ApiGatewayV2::Stage",
-      "Properties": {
-        "ApiId": {
-          "Ref": "WebsocketsApi"
-        },
-        "DeploymentId": {
-          "Ref": "WebsocketsDeployment1578022789553"
-        },
-        "StageName": "dev",
-        "Description": "Serverless Websockets"
-      }
-    },
-    "SendUploadNotificationsSnsSubscriptionImagesTopicdev": {
-      "Type": "AWS::SNS::Subscription",
-      "Properties": {
-        "TopicArn": {
-          "Fn::Join": [
-            ":",
-            [
-              "arn:aws:sns",
-              {
-                "Ref": "AWS::Region"
-              },
-              {
-                "Ref": "AWS::AccountId"
-              },
-              "imagesTopic-dev"
-            ]
-          ]
-        },
-        "Protocol": "lambda",
-        "Endpoint": {
-          "Fn::GetAtt": [
-            "SendUploadNotificationsLambdaFunction",
-            "Arn"
-          ]
-        }
-      }
-    },
-    "SendUploadNotificationsLambdaPermissionImagesTopicdevSNS": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "SendUploadNotificationsLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "sns.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            ":",
-            [
-              "arn:aws:sns",
-              {
-                "Ref": "AWS::Region"
-              },
-              {
-                "Ref": "AWS::AccountId"
-              },
-              "imagesTopic-dev"
-            ]
-          ]
-        }
       }
     },
     "ResizeSnsSubscriptionImagesTopicdev": {
@@ -1622,24 +982,7 @@
         },
         "ContentType": "application/json",
         "Name": "GroupRequest",
-        "Schema": {
-          "$schema": "http://json-schema.org/draft-04/schema",
-          "title": "group",
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "description"
-          ],
-          "additionalProperties": false
-        }
+        "Schema": {}
       }
     },
     "FeedRequestModel": {
@@ -1657,13 +1000,124 @@
           "properties": {
             "title": {
               "type": "string"
+            },
+            "description": {
+              "type": "string"
             }
           },
           "required": [
-            "title"
+            "title",
+            "description"
           ],
           "additionalProperties": false
         }
+      }
+    },
+    "GetGroupsIamRoleLambdaExecution": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "dev",
+                  "serverless-udagram-app",
+                  "lambda"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-udagram-app-dev-GetGroups:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-images-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "codedeploy:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Scan"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Groups-dev"
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              "serverless-udagram-app",
+              "dev",
+              "GetGroups",
+              {
+                "Ref": "AWS::Region"
+              },
+              "lambdaRole"
+            ]
+          ]
+        },
+        "ManagedPolicyArns": []
       }
     },
     "GetFeedsIamRoleLambdaExecution": {
@@ -1715,14 +1169,153 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                    "dynamodb:GetItem"
+                    "s3:PutObject",
+                    "s3:GetObject"
                   ],
-                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Groups-dev"
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-images-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "codedeploy:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Scan"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev"
                 },
                 {
                   "Effect": "Allow",
                   "Action": [
                     "dynamodb:Query"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev/index/ImageIdIndex"
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              "serverless-udagram-app",
+              "dev",
+              "GetFeeds",
+              {
+                "Ref": "AWS::Region"
+              },
+              "lambdaRole"
+            ]
+          ]
+        },
+        "ManagedPolicyArns": []
+      }
+    },
+    "CreateFeedIamRoleLambdaExecution": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "dev",
+                  "serverless-udagram-app",
+                  "lambda"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-udagram-app-dev-CreateFeed:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-images-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "codedeploy:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:PutItem"
                   ],
                   "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev"
                 }
@@ -1737,7 +1330,114 @@
             [
               "serverless-udagram-app",
               "dev",
-              "GetFeeds",
+              "CreateFeed",
+              {
+                "Ref": "AWS::Region"
+              },
+              "lambdaRole"
+            ]
+          ]
+        },
+        "ManagedPolicyArns": []
+      }
+    },
+    "ResizeIamRoleLambdaExecution": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "dev",
+                  "serverless-udagram-app",
+                  "lambda"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-udagram-app-dev-Resize:*:*"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-thumbnail-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": "arn:aws:s3:::serverless-udagram-sing-images-dev/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "xray:PutTraceSegments"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "codedeploy:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:us-east-2:*:table/Feeds-dev"
+                }
+              ]
+            }
+          }
+        ],
+        "Path": "/",
+        "RoleName": {
+          "Fn::Join": [
+            "-",
+            [
+              "serverless-udagram-app",
+              "dev",
+              "Resize",
               {
                 "Ref": "AWS::Region"
               },
@@ -1829,25 +1529,6 @@
         ]
       }
     },
-    "WebSocketConnectionsDynamoDBTable": {
-      "Type": "AWS::DynamoDB::Table",
-      "Properties": {
-        "AttributeDefinitions": [
-          {
-            "AttributeName": "id",
-            "AttributeType": "S"
-          }
-        ],
-        "KeySchema": [
-          {
-            "AttributeName": "id",
-            "KeyType": "HASH"
-          }
-        ],
-        "BillingMode": "PAY_PER_REQUEST",
-        "TableName": "Connections-dev"
-      }
-    },
     "RequestBodyValidator": {
       "Type": "AWS::ApiGateway::RequestValidator",
       "Properties": {
@@ -1896,20 +1577,6 @@
             }
           ]
         }
-      }
-    },
-    "SendUploadNotificationsPermissionPhotosS3": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "SendUploadNotificationsLambdaFunction"
-        },
-        "Principal": "s3.amazonaws.com",
-        "Action": "lambda:InvokeFunction",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId"
-        },
-        "SourceArn": "arn:aws:s3:::serverless-udagram-sing-images-dev"
       }
     },
     "BucketPolicy": {
@@ -2023,61 +1690,31 @@
     "RS256AuthLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RS256AuthLambdaVersionUi0AyobyjQFD1FqW48YE4TCW9apXi6YhrUAAJ4wOY"
-      }
-    },
-    "AuthLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "AuthLambdaVersiondxYsTipNiKgibgdZXun2JMPhOZI0J9CtK7rRclC7Kg"
+        "Ref": "RS256AuthLambdaVersionuU48sesJ7XMIrUEjeqZDInyqTo5yKwzODqg9zZzqA"
       }
     },
     "GetGroupsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetGroupsLambdaVersionS9KX5gwiNHqSv0KFEoUBfFAmLR13G946MtMXyvTuo"
-      }
-    },
-    "CreateGroupLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "CreateGroupLambdaVersionUCLANcLJ6aqPwtPN7EtSB5ciqAXfs8de80JT0YFyDE"
+        "Ref": "GetGroupsLambdaVersionz67t4JPAedscy2LVY8B0kINbxnRKXJUXQ8UaHKWqM"
       }
     },
     "GetFeedsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetFeedsLambdaVersionUxworBLldvRy92kWC9RcH8WbEFXyG8a7DfGDtY6XY"
+        "Ref": "GetFeedsLambdaVersionlgkwTa9FLXjzwwXT9FVqQQrnIUXZz2UGcgCComV6f9E"
       }
     },
-    "CreateFeedsLambdaFunctionQualifiedArn": {
+    "CreateFeedLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CreateFeedsLambdaVersionRIw9FO2jIxK6u3QOgVSvxVmaEZyM2shbi8tcunrc5Q"
-      }
-    },
-    "SendUploadNotificationsLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "SendUploadNotificationsLambdaVersionuuzqilBcYDFNHoziTbU2hXwazOsCrHFX4KPUqA"
+        "Ref": "CreateFeedLambdaVersionugX3VFPkPeS8mzZffmCWpIYAer66zFDXTrUbBcB0X4"
       }
     },
     "ResizeLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ResizeLambdaVersionxwahoJBfAkLdomuqOXlQpNbq2b2r9ugwZCTnJqFsjaI"
-      }
-    },
-    "ConnectHandlerLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "ConnectHandlerLambdaVersioniI4NUgrDK2DH51tDmDjxWmuVEmnmvoPYEW2tntVm8"
-      }
-    },
-    "DisconnectHandlerLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "DisconnectHandlerLambdaVersionYlPdjvelU6oSy6TDNPskOA14dw63Z9ecGK5jGex4"
+        "Ref": "ResizeLambdaVersionXVqIXZgNJPAS1YcBECUgL4U5lPicPAx1Gn9GnEbT8gQ"
       }
     },
     "ServiceEndpoint": {
@@ -2089,29 +1726,6 @@
             "https://",
             {
               "Ref": "ApiGatewayRestApi"
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region"
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix"
-            },
-            "/dev"
-          ]
-        ]
-      }
-    },
-    "ServiceEndpointWebsocket": {
-      "Description": "URL of the service endpoint",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "wss://",
-            {
-              "Ref": "WebsocketsApi"
             },
             ".execute-api.",
             {
