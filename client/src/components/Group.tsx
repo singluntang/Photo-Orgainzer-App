@@ -38,9 +38,9 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
     return (
       <GroupLegend>
           <fieldset>
-            <legend>Cars Or Motor</legend>
+            <legend>{this.props.group.name}</legend>
             <GroupDescription>
-            <Link to={`/feeds/${this.props.group.id}`}>{this.props.group.name}</Link>
+            <Link to={`/feeds/${this.props.group.id}`}>{this.props.group.description}</Link>
             </GroupDescription>
           </fieldset>            
       </GroupLegend>

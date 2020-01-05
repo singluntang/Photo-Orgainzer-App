@@ -4,7 +4,6 @@ import FeedList from './components/FeedList'
 import  GroupList  from './components/GroupList'
 import { Router, Link , Route, Switch } from 'react-router-dom'
 import { NotFound } from './components/NotFound'
-import { CreateGroup } from './components/CreateGroup'
 import { CreateFeed } from './components/CreateFeed'
 import Auth from './auth/Auth'
 import styled from 'styled-components';
@@ -123,25 +122,29 @@ export default class App extends Component<AppProps, AppState> {
     return (
       <Switch>
         <Route
-          path="/groups/create"
-          exact
-          render={props => {
-            return <CreateGroup {...props} auth={this.props.auth} />
-          }}
-        />
-
-        <Route path="/feeds/:groupId" exact component={FeedList} />
-
-        <Route
-          path="/feeds/:groupId/create"
+          path="/feeds/create"
           exact
           render={props => {
             return <CreateFeed {...props} auth={this.props.auth} />
           }}
         />
 
-        <Route path="/" exact component={GroupList} />
+        <Route
+          path="/feeds/:groupId"
+          exact
+          render={props => {
+            return <FeedList {...props} auth={this.props.auth} />
+          }}
+        />          
 
+        <Route
+          path="/"
+          exact
+          render={props => {
+            return <GroupList {...props} auth={this.props.auth} />
+          }}
+        />        
+        
         <Route component={NotFound} />
       </Switch>
     )

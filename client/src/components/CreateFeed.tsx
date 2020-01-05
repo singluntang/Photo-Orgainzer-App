@@ -1,6 +1,9 @@
 import * as React from 'react'
-//import { createFeed, uploadFile } from '../api/images-api'
+import { createFeed, uploadFile } from '../api/feeds-api'
+import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
+import { ImageUploadInfo } from '../types/ImageUploadInfo'
+import { ImageUploadResponse } from '../types/ImageUploadResponse'
 
 enum UploadState {
   NoUpload,
@@ -18,7 +21,7 @@ interface createFeedProps {
 }
 
 interface createFeedState {
-  title: string
+  item: ImageUploadInfo
   file: any
   uploadState: UploadState
 }
@@ -28,14 +31,24 @@ export class CreateFeed extends React.PureComponent<
   createFeedState
 > {
   state: createFeedState = {
-    title: '',
+    item: {groupId: this.props.match.params.groupId, 
+           title: '', 
+           description: ''},
     file: undefined,
     uploadState: UploadState.NoUpload
   }
 
   handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ title: event.target.value })
+    this.setState({ item: {groupId: this.state.item.groupId,
+                           title: event.target.value, 
+                           description: this.state.item.description }})
   }
+
+  handleDescritionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ item: {groupId: this.state.item.groupId,
+                           title: this.state.item.title, 
+                           description: event.target.value }})
+  }  
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -48,7 +61,7 @@ export class CreateFeed extends React.PureComponent<
   }
 
   handleSubmit = async (event: React.SyntheticEvent) => {
-      /*
+      
     event.preventDefault()
 
     try {
@@ -58,10 +71,7 @@ export class CreateFeed extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.UploadingData)
-      const uploadInfo = await createFeed(this.props.auth.getIdToken(), {
-        groupId: this.props.match.params.groupId,
-        title: this.state.title
-      })
+      const uploadInfo: ImageUploadResponse = await createFeed(this.props.auth.getIdToken(), this.state.item)
 
       console.log('Created image', uploadInfo)
 
@@ -74,7 +84,7 @@ export class CreateFeed extends React.PureComponent<
     } finally {
       this.setUploadState(UploadState.NoUpload)
     }
-    */
+    
   }
 
   setUploadState(uploadState: UploadState) {
@@ -83,10 +93,41 @@ export class CreateFeed extends React.PureComponent<
     })
   }
 
+
   render() {
     return (
       <div>
-        <h1>Upload new Feed</h1>
+        <h1>Upload new image</h1>
+
+        <Form onSubmit={this.handleSubmit}>
+          <Form.Field>
+            <label>Title</label>
+            <input
+              placeholder="Image title"
+              value={this.state.item.title}
+              onChange={this.handleTitleChange}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>Description</label>
+            <input
+              placeholder="Image Description"
+              value={this.state.item.description}
+              onChange={this.handleTitleChange}
+            />
+          </Form.Field>          
+          <Form.Field>
+            <label>Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              placeholder="Image to upload"
+              onChange={this.handleFileChange}
+            />
+          </Form.Field>
+
+          {this.renderButton()}
+        </Form>
       </div>
     )
   }
@@ -95,7 +136,14 @@ export class CreateFeed extends React.PureComponent<
 
     return (
       <div>
-            <button>Upload</button>
+        {this.state.uploadState === UploadState.UploadingData && <p>Uploading image metadata</p>}
+        {this.state.uploadState === UploadState.UploadingFile && <p>Uploading file</p>}
+        <Button
+          loading={this.state.uploadState !== UploadState.NoUpload}
+          type="submit"
+        >
+          Upload
+        </Button>
       </div>
     )
   }

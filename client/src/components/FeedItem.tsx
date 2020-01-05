@@ -63,7 +63,7 @@ export class FeedItem extends React.PureComponent<FeedCardProps, FeedCardState> 
             <CardContent>
                 <img src={this.props.feed.imageUrl} width='90%'/>
             </CardContent>            
-            <CardDescription>{this.props.feed.title}</CardDescription>
+            <CardDescription>{this.props.feed.description}</CardDescription>
             <CardFooter>
                 <CardFont>
                     <FontAwesomeIcon icon={faThumbsUp} />

@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { GroupModel } from '../types/GroupModel'
 import { Group } from './Group'
-import { getGroups } from '../api/groups-api'
+import { createGroup } from '../api/groups-api'
 import { History } from 'history'
 import styled from 'styled-components';
+import Auth from '../auth/Auth'
 
 
 const GroupListStyle = styled.div`
@@ -32,6 +33,7 @@ const Button = styled.button`
 `;
 
 interface GroupsListProps {
+  auth: Auth,
   history: History
 }
 
@@ -44,13 +46,20 @@ export default class GroupList extends React.PureComponent<GroupsListProps, Grou
     groups: []
   }
 
-  handleCreateGroup = () => {
-    this.props.history.push(`/groups/create`)
+  handleCreateGroup = async () => {
+    try {
+      const newGroups: any = await createGroup(this.props.auth.idToken)
+      this.setState({
+        groups: newGroups
+      })
+    } catch (e) {
+      alert(`Failed to fetch groups: ${e.message}`)
+    }    
   }
 
   async componentDidMount() {
     try {
-      const groups = await getGroups()
+      const groups: any = await createGroup(this.props.auth.idToken)
       this.setState({
         groups
       })
@@ -65,7 +74,7 @@ export default class GroupList extends React.PureComponent<GroupsListProps, Grou
           <Button
             onClick={this.handleCreateGroup}
           >
-            Create new group
+            Refresh Group
           </Button> 
           <GroupStyle>         
             {this.state.groups.map(group => {

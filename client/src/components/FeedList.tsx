@@ -3,13 +3,31 @@ import styled from 'styled-components';
 import { FeedModel } from '../types/FeedModel'
 import { FeedItem } from './FeedItem'
 import { getFeeds } from '../api/feeds-api'
-//import { Card, Button, Divider } from 'semantic-ui-react'
 import { History } from 'history'
+import Auth from '../auth/Auth'
 
+const FeedStyle = styled.div`
+  margin-top: 50px;
+`;
 const FeedListStyle = styled.div`  
   width: 100%;
   display: flex;
   flex-direction: column;
+`;
+const Button = styled.button`
+  cursor: pointer;
+  background: transparent;
+  font-size: 20px;
+  border-radius: 10px;
+  color: #5199FF;
+  border: 2px solid #5199FF;
+  margin: 0 1em;
+  padding: 0.25em 1em;
+  transition: 0.5s all ease-out;
+  &:hover {
+    background-color: #5199FF;
+    color: white;
+  }
 `;
 
 interface FeedsListProps {
@@ -18,7 +36,8 @@ interface FeedsListProps {
     params: {
       groupId: string
     }
-  }
+  },
+  auth: Auth
 }
 
 interface feedsListState {
@@ -36,7 +55,7 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
 
   async componentDidMount() {
     try {
-      const feeds = await getFeeds(this.props.match.params.groupId)
+      const feeds = await getFeeds(this.props.match.params.groupId, this.props.auth.idToken)
       this.setState({
         feeds
       })
@@ -48,11 +67,18 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
 
   render() {
     return (
-      <FeedListStyle>
-        {this.state.feeds.map(feed => {
-            return <FeedItem key={feed.imageId} feed={feed} />
-          })}        
-      </FeedListStyle>
+      <FeedStyle>
+            <Button
+            onClick={this.handleCreateFeed}
+            >
+            Refresh Feed
+          </Button>       
+          <FeedListStyle>
+            {this.state.feeds.map(feed => {
+                return <FeedItem key={feed.imageId} feed={feed} />
+              })}        
+          </FeedListStyle>
+      </FeedStyle>
     )
   }
 }
