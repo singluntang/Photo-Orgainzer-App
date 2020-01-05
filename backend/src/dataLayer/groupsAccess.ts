@@ -2,7 +2,6 @@ import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 var AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS)
-import { Group } from '../models/Group'
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
@@ -26,10 +25,46 @@ export class GroupAccess {
 
       let error: boolean = false;
 
-      this.docClient.batchWrite({
+     await this.docClient.batchWrite({
         RequestItems: {
           'Groups-dev': [
             {
+              DeleteRequest: {
+                Key: { id: '1' }
+              }
+            },            
+            {
+              DeleteRequest: {
+                Key: { id: '2' }
+              }
+            },                        
+            {
+              DeleteRequest: {
+                Key: { id: '3' }
+              }
+            },            
+            {
+              DeleteRequest: {
+                Key: { id: '4' }
+              }
+            }           
+          ]
+        }
+      }).promise()
+      .then(() => {
+        logger.info('Items deleted', '')
+      })
+      .catch((e) => {
+        logger.info('Failed to delete', e.message) 
+        error = true
+      })
+
+      if (error) return true
+
+      await this.docClient.batchWrite({
+        RequestItems: {
+          'Groups-dev': [            
+            {              
               PutRequest: {
                 Item: {
                   "id": "1",
@@ -37,7 +72,7 @@ export class GroupAccess {
                   "description": "Only dog images here!"
                 }
               }
-            },
+            },          
             {
               PutRequest: {
                 Item: {
@@ -46,7 +81,7 @@ export class GroupAccess {
                   "description": "What can be a better object for photography"
                 }
               }
-            },
+            },          
             {
               PutRequest: {
                 Item: {
@@ -55,7 +90,7 @@ export class GroupAccess {
                   "description": "Creative display of urban settings"
                 }
               }
-            },
+            },          
             {
               PutRequest: {
                 Item: {
@@ -72,14 +107,14 @@ export class GroupAccess {
         logger.info('Items added', '')
       })
       .catch((e) => {
-        logger.info('Failed', e.message) 
+        logger.info('Failed to add', e.message) 
         error = true
       })
 
       return error
     }    
 
-  async getAllGroups(): Promise<Group[]> {
+  async getAllGroups(): Promise<any> {
     const result = await this.docClient.scan({
       TableName: this.groupsTable
     }).promise()
@@ -88,7 +123,7 @@ export class GroupAccess {
 
     logger.info('Getting groups', items) 
 
-    return items as Group[]
+    return items 
   }
 
   async createFeed(feed: Feed): Promise<Feed> {

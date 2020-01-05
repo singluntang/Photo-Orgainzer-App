@@ -1,6 +1,4 @@
 import * as uuid from 'uuid'
-
-import { Group } from '../models/Group'
 import { Feed } from '../models/Feed'
 import { GroupAccess } from '../dataLayer/groupsAccess'
 import { CreateFeedRequest } from '../requests/CreateFeedRequest'
@@ -8,7 +6,7 @@ import { CreateFeedRequest } from '../requests/CreateFeedRequest'
 
 const groupAccess = new GroupAccess()
 
-export async function getAllGroups(): Promise<Group[]> {
+export async function getAllGroups(): Promise<any> {
   return groupAccess.getAllGroups()
 }
 
@@ -44,7 +42,8 @@ export async function createFeed(
     groupId: groupId,
     imageId,
     title: CreateFeedRequest.title,
-    imageUrl: CreateFeedRequest.imageUrl,
+    description: CreateFeedRequest.description,
+    imageUrl: null,
     timestamp: new Date().toISOString()
   })
 }

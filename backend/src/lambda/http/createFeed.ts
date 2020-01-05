@@ -10,7 +10,7 @@ const logger = createLogger('createFeed')
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   logger.info('Caller event', event)
-  const groupId = event.pathParameters.groupId
+  const groupId: string = event.pathParameters.groupId
 
   const newFeed: CreateFeedRequest = JSON.parse(event.body)  
 
@@ -22,6 +22,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   return {
     statusCode: 201,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },    
     body: JSON.stringify({
       newItem: newItem,
       uploadUrl: url

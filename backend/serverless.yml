@@ -66,10 +66,7 @@ custom:
         version: v1.0.0
         title: Udagram API
         description: Serverless application for images sharing
-    models:
-      - name: GroupRequest
-        contentType: application/json
-        schema: ${file(models/create-group-request.json)}
+    models:   
       - name: FeedRequest
         contentType: application/json
         schema: ${file(models/create-feed-request.json)} 
@@ -89,21 +86,9 @@ custom:
 functions:
 
   RS256Auth:
-    handler: src/lambda/auth/rs256Auth0Authorizer.handler    
-
-  GetGroups:
-    handler: src/lambda/http/getGroups.handler
-    events:
-      - http:
-          method: get
-          path: groups
-          cors: true
+    handler: src/lambda/auth/rs256Auth0Authorizer.handler 
     iamRoleStatementsInherit: true          
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - dynamodb:Scan
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}                
+                      
 
   GetFeeds:
     handler: src/lambda/http/getFeeds.handler
@@ -111,6 +96,7 @@ functions:
       - http:
           method: get
           path: groups/{groupId}/feeds
+          authorizer: RS256Auth
           cors: true
     iamRoleStatementsInherit: true          
     iamRoleStatements:
@@ -145,7 +131,29 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}                      
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}  
+        
+  CreateGroup:
+    handler: src/lambda/http/createGroup.handler
+    events:
+      - http:
+          method: post
+          path: groups
+          authorizer: RS256Auth
+          cors: true         
+    iamRoleStatementsInherit: true               
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE} 
+      - Effect: Allow
+        Action:
+          - dynamodb:BatchWriteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}               
+    #deploymentSettings:
+    #  type: Linear10PercentEvery1Minute
+    #  alias: Live        
        
   Resize:           
     handler: src/lambda/s3/resizeImage.handler
