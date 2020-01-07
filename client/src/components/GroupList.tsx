@@ -16,21 +16,6 @@ const GroupStyle = styled.div`
   flex-wrap: wrap;
   justify-content: space-around;
 `;
-const Button = styled.button`
-  cursor: pointer;
-  background: transparent;
-  font-size: 20px;
-  border-radius: 10px;
-  color: #5199FF;
-  border: 2px solid #5199FF;
-  margin: 0 1em;
-  padding: 0.25em 1em;
-  transition: 0.5s all ease-out;
-  &:hover {
-    background-color: #5199FF;
-    color: white;
-  }
-`;
 
 interface GroupsListProps {
   auth: Auth,
@@ -46,17 +31,6 @@ export default class GroupList extends React.PureComponent<GroupsListProps, Grou
     groups: []
   }
 
-  handleCreateGroup = async () => {
-    try {
-      const newGroups: any = await createGroup(this.props.auth.idToken)
-      this.setState({
-        groups: newGroups
-      })
-    } catch (e) {
-      alert(`Failed to fetch groups: ${e.message}`)
-    }    
-  }
-
   async componentDidMount() {
     try {
       const groups: any = await createGroup(this.props.auth.idToken)
@@ -70,12 +44,7 @@ export default class GroupList extends React.PureComponent<GroupsListProps, Grou
 
   render() {
     return (
-        <GroupListStyle>
-          <Button
-            onClick={this.handleCreateGroup}
-          >
-            Refresh Group
-          </Button> 
+        <GroupListStyle> 
           <GroupStyle>         
             {this.state.groups.map(group => {
                 return <Group key={group.id} group={group} />

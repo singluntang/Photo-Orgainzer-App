@@ -122,20 +122,20 @@ export default class App extends Component<AppProps, AppState> {
     return (
       <Switch>
         <Route
-          path="/feeds/create"
-          exact
-          render={props => {
-            return <CreateFeed {...props} auth={this.props.auth} />
-          }}
-        />
-
-        <Route
           path="/feeds/:groupId"
           exact
           render={props => {
             return <FeedList {...props} auth={this.props.auth} />
           }}
-        />          
+        />         
+
+        <Route
+          path="/groups/:groupId/feeds"
+          exact
+          render={props => {
+            return <CreateFeed {...props} auth={this.props.auth} />
+          }}
+        />         
 
         <Route
           path="/"

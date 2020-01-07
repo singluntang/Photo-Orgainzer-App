@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { FeedModel } from '../types/FeedModel'
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faThumbsUp } from '@fortawesome/free-solid-svg-icons'
 
 const Card = styled.div`
   background-color: #fff;
@@ -31,18 +29,6 @@ const CardDescription = styled.div`
     font-size: 24px;
     font-family: udagramCardHeader;
 `;
-const CardFont = styled.div`
-  font-size: 28px;
-  color: grey;
-`;
-const CardFooter = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 26px 20px;
-  width: 100%;
-  font-size: 16px;
-  align-items: center;
-`;
 
 interface FeedCardProps {
   feed: FeedModel
@@ -54,22 +40,16 @@ interface FeedCardState {
 
 export class FeedItem extends React.PureComponent<FeedCardProps, FeedCardState> {
 
-  render() {
+  render() {   
     return (
         <Card>
             <CardHeader>
                 {this.props.feed.title}
             </CardHeader>
             <CardContent>
-                <img src={this.props.feed.imageUrl} width='90%'/>
+                <img src={this.props.feed.imageUrl}/>
             </CardContent>            
             <CardDescription>{this.props.feed.description}</CardDescription>
-            <CardFooter>
-                <CardFont>
-                    <FontAwesomeIcon icon={faThumbsUp} />
-                </CardFont>
-                &nbsp;&nbsp;20 Likes
-            </CardFooter>
         </Card>        
     )
   }

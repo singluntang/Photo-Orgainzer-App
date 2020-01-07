@@ -113,7 +113,7 @@ export class CreateFeed extends React.PureComponent<
             <input
               placeholder="Image Description"
               value={this.state.item.description}
-              onChange={this.handleTitleChange}
+              onChange={this.handleDescritionChange}
             />
           </Form.Field>          
           <Form.Field>

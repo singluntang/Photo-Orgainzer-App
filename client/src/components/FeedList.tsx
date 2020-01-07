@@ -50,7 +50,7 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
   }
 
   handleCreateFeed = () => {
-    this.props.history.push(`/feeds/create`)
+    this.props.history.push(`/groups/${this.props.match.params.groupId}/feeds`)
   }
 
   async componentDidMount() {
@@ -71,10 +71,10 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
             <Button
             onClick={this.handleCreateFeed}
             >
-            Refresh Feed
+            New Feed
           </Button>       
           <FeedListStyle>
-            {this.state.feeds.map(feed => {
+            {this.state.feeds.map(feed => {                
                 return <FeedItem key={feed.imageId} feed={feed} />
               })}        
           </FeedListStyle>
