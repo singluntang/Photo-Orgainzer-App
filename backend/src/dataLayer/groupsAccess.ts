@@ -47,7 +47,13 @@ export class GroupAccess {
               DeleteRequest: {
                 Key: { id: '4' }
               }
-            }           
+            } 
+            ,            
+            {
+              DeleteRequest: {
+                Key: { id: '5' }
+              }
+            }                      
           ]
         }
       }).promise()
@@ -100,6 +106,16 @@ export class GroupAccess {
                 }
               }
             },
+            ,          
+            {
+              PutRequest: {
+                Item: {
+                  "id": "5",
+                  "name": "Foods",
+                  "description": "For those who like to eat"
+                }
+              }
+            }            
           ]
         }
       }).promise()
@@ -138,7 +154,7 @@ export class GroupAccess {
   async getGroupFeeds(groupId: string): Promise<Feed[]> {
     const params = {
       TableName: this.feedsTable,
-      ProjectionExpression: "groupId, imageId, #ts, imageUrl",
+      ProjectionExpression: "groupId, imageId, #ts, title, description, imageUrl",
       FilterExpression: "groupId = :groupId",
       ExpressionAttributeNames:{
         "#ts": "timestamp"
@@ -154,16 +170,22 @@ export class GroupAccess {
     return items as Feed[]
   }
 
-  getUploadUrl(imageId: string): any {
+  getUploadUrl(imageId: string): string {
 
-    return XAWS.S3.getSignedUrl('putObject', {
-      Bucket: this.bucketName,
-      Key: imageId,
-      Expires: this.urlExpiration
-    })
+    const s3 = new XAWS.S3({
+      signatureVersion: 'v4',
+      region: this.region
+    });    
+
+    var params = {Bucket: this.bucketName, Key: imageId, Expires: this.urlExpiration};
+
+    logger.info('UrlUpload Param', params)
+    
+    return s3.getSignedUrl('putObject', params)
+ 
   }
   
-  async attachUrlToImage(uploadUrl: string, imageId: string) {
+  async attachUrlToFeed(uploadUrl: string, imageId: string) {
 
     const params = {
       TableName: this.feedsTable,
@@ -171,7 +193,7 @@ export class GroupAccess {
           "imageId": imageId
       },
       ConditionExpression:"imageId = :imageId",
-      UpdateExpression: "set attachmentUrl = :r",     
+      UpdateExpression: "set imageUrl = :r",     
       ExpressionAttributeValues:{
           ":imageId":imageId,
           ":r":uploadUrl
@@ -200,10 +222,16 @@ export class GroupAccess {
   
     const body = response.Body
     const image = await Jimp.read(body)
+                    .then(image => {
+                      return image
+                      .resize(550, Jimp.AUTO) // resize
+                    })
+                    . then(resizedImg => {
+                      return resizedImg
+                    })
   
     logger.info('Buffer',image)
-  
-    image.resize(150, Jimp.AUTO)
+
     const convertedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
   
     logger.info('Writing image back to S3 bucket', this.thumbnailBucketName)
@@ -214,10 +242,8 @@ export class GroupAccess {
         Body: convertedBuffer
       })
       .promise()
-  
+
   }
-
-
 }
 
   function createDynamoDBClient() {

@@ -15,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   logger.info('Get Feed', result)
 
-  if (result.Count !== 0) {
+  
     return {
       statusCode: 200,
       headers: {
@@ -25,13 +25,5 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         items: result
       })
     }
-  }
 
-  return {
-    statusCode: 404,
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    },
-    body: ''
-  }
 }

@@ -204,17 +204,11 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
-          - AttributeName: groupId
-            AttributeType: S
-          - AttributeName: timestamp
-            AttributeType: S
           - AttributeName: imageId
             AttributeType: S
         KeySchema:
-          - AttributeName: groupId
+          - AttributeName: imageId
             KeyType: HASH
-          - AttributeName: timestamp
-            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         StreamSpecification:
           StreamViewType: NEW_IMAGE
@@ -273,7 +267,9 @@ resources:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
               Principal: '*'
-              Action: 's3:GetObject'
+              Action: 
+                - "s3:GetObject"
+                - "s3:PutObject"
               Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
         Bucket: !Ref S3BucketPhotos  
 

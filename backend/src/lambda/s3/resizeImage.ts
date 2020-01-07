@@ -1,7 +1,7 @@
 import { SNSHandler, SNSEvent, S3Event } from 'aws-lambda'
 import 'source-map-support/register'
 import { createLogger } from '../../utils/logger'
-import { attachUrlToImage, processImage } from '../../businessLogic/udagram'
+import { attachUrlToFeed, processImage } from '../../businessLogic/udagram'
 
 const logger = createLogger('attachimageUrl')
 
@@ -36,7 +36,7 @@ export const handler: SNSHandler = async (event: SNSEvent) => {
 
     logger.info('imageUrl', imageUrl)    
 
-    await attachUrlToImage(imageUrl, key) 
+    await attachUrlToFeed(imageUrl, key) 
        
   }
 }

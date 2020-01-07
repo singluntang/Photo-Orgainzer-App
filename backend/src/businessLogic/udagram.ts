@@ -18,12 +18,12 @@ export async function processImage(Key) {
   await groupAccess.processFeedImage(Key)
 }
 
-export function getUploadUrl(imageUrl: string): any {
-  return groupAccess.getUploadUrl(imageUrl)
+export function getUploadUrl(imageId: string): any {
+  return groupAccess.getUploadUrl(imageId)
 }
 
-export async function attachUrlToImage(uploadUrl, imageId) {  
-  await groupAccess.attachUrlToImage(uploadUrl, imageId)
+export async function attachUrlToFeed(uploadUrl, imageId) {  
+  await groupAccess.attachUrlToFeed(uploadUrl, imageId)
 }
 
 

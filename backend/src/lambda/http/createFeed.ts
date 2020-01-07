@@ -18,7 +18,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   logger.info('New Item', newItem)
 
-  const url: any = getUploadUrl(newItem.imageUrl)
+  const url: any = getUploadUrl(newItem.imageId)
+
+  logger.info('Upload Url', url)
 
   return {
     statusCode: 201,
