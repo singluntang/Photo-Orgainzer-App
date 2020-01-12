@@ -4,6 +4,8 @@ import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { ImageUploadInfo } from '../types/ImageUploadInfo'
 import { ImageUploadResponse } from '../types/ImageUploadResponse'
+import {NavBar} from './Nav'
+import { History } from 'history'
 
 enum UploadState {
   NoUpload,
@@ -11,12 +13,13 @@ enum UploadState {
   UploadingFile,
 }
 
-interface createFeedProps {
+interface CreateFeedProps {
+  history: History
   match: {
     params: {
       groupId: string
     }
-  }
+  },
   auth: Auth
 }
 
@@ -26,10 +29,7 @@ interface createFeedState {
   uploadState: UploadState
 }
 
-export class CreateFeed extends React.PureComponent<
-  createFeedProps,
-  createFeedState
-> {
+export default class CreateFeed extends React.PureComponent<CreateFeedProps, createFeedState> {
   state: createFeedState = {
     item: {groupId: this.props.match.params.groupId, 
            title: '', 
@@ -96,39 +96,42 @@ export class CreateFeed extends React.PureComponent<
 
   render() {
     return (
-      <div>
-        <h1>Upload new image</h1>
+      <React.Fragment>
+          <NavBar {...this.props} auth={this.props.auth} />      
+          <div>
+            <h1>Upload new image</h1>
 
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Field>
-            <label>Title</label>
-            <input
-              placeholder="Image title"
-              value={this.state.item.title}
-              onChange={this.handleTitleChange}
-            />
-          </Form.Field>
-          <Form.Field>
-            <label>Description</label>
-            <input
-              placeholder="Image Description"
-              value={this.state.item.description}
-              onChange={this.handleDescritionChange}
-            />
-          </Form.Field>          
-          <Form.Field>
-            <label>Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              placeholder="Image to upload"
-              onChange={this.handleFileChange}
-            />
-          </Form.Field>
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Field>
+                <label>Title</label>
+                <input
+                  placeholder="Image title"
+                  value={this.state.item.title}
+                  onChange={this.handleTitleChange}
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>Description</label>
+                <input
+                  placeholder="Image Description"
+                  value={this.state.item.description}
+                  onChange={this.handleDescritionChange}
+                />
+              </Form.Field>          
+              <Form.Field>
+                <label>Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  placeholder="Image to upload"
+                  onChange={this.handleFileChange}
+                />
+              </Form.Field>
 
-          {this.renderButton()}
-        </Form>
-      </div>
+              {this.renderButton()}
+            </Form>
+          </div>
+      </React.Fragment>
     )
   }
 

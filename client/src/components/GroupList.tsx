@@ -5,6 +5,7 @@ import { createGroup } from '../api/groups-api'
 import { History } from 'history'
 import styled from 'styled-components';
 import Auth from '../auth/Auth'
+import {NavBar} from './Nav'
 
 
 const GroupListStyle = styled.div`
@@ -44,13 +45,16 @@ export default class GroupList extends React.PureComponent<GroupsListProps, Grou
 
   render() {
     return (
+      <React.Fragment>
+          <NavBar {...this.props} auth={this.props.auth} />        
         <GroupListStyle> 
           <GroupStyle>         
             {this.state.groups.map(group => {
                 return <Group key={group.id} group={group} />
             })}            
           </GroupStyle>         
-        </GroupListStyle>            
+        </GroupListStyle>  
+      </React.Fragment>         
     )
   }
 }

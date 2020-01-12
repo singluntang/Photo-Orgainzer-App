@@ -5,6 +5,7 @@ import { FeedItem } from './FeedItem'
 import { getFeeds } from '../api/feeds-api'
 import { History } from 'history'
 import Auth from '../auth/Auth'
+import {NavBar} from './Nav'
 
 const FeedStyle = styled.div`
   margin-top: 50px;
@@ -67,18 +68,21 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
 
   render() {
     return (
-      <FeedStyle>
-            <Button
-            onClick={this.handleCreateFeed}
-            >
-            New Feed
-          </Button>       
-          <FeedListStyle>
-            {this.state.feeds.map(feed => {                
-                return <FeedItem key={feed.imageId} feed={feed} />
-              })}        
-          </FeedListStyle>
-      </FeedStyle>
+      <React.Fragment>
+          <NavBar {...this.props} auth={this.props.auth} />
+          <FeedStyle>
+                <Button
+                onClick={this.handleCreateFeed}
+                >
+                New Feed
+              </Button>       
+              <FeedListStyle>
+                {this.state.feeds.map(feed => {                
+                    return <FeedItem key={feed.imageId} feed={feed} />
+                  })}        
+              </FeedListStyle>
+          </FeedStyle>
+      </React.Fragment>
     )
   }
 }

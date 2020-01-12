@@ -35,15 +35,15 @@ interface GroupCardState {
 export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
 
   render() {
-    return (
-      <GroupLegend>
-          <fieldset>
-            <legend>{this.props.group.name}</legend>
-            <GroupDescription>
-            <Link to={`/feeds/${this.props.group.id}`}>{this.props.group.description}</Link>
-            </GroupDescription>
-          </fieldset>            
-      </GroupLegend>
+    return (     
+              <GroupLegend>
+                  <fieldset>
+                    <legend>{this.props.group.name}</legend>
+                    <GroupDescription>
+                    <Link to={`/feeds/${this.props.group.id}`}>{this.props.group.description}</Link>
+                    </GroupDescription>
+                  </fieldset>            
+              </GroupLegend>
     )
   }
 }

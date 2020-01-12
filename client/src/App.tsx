@@ -4,7 +4,7 @@ import FeedList from './components/FeedList'
 import  GroupList  from './components/GroupList'
 import { Router, Link , Route, Switch } from 'react-router-dom'
 import { NotFound } from './components/NotFound'
-import { CreateFeed } from './components/CreateFeed'
+import  CreateFeed  from './components/CreateFeed'
 import Auth from './auth/Auth'
 import styled from 'styled-components';
 
@@ -84,9 +84,7 @@ export default class App extends Component<AppProps, AppState> {
     return (
           <Body>
                 <Router history={this.props.history}>
-                  {this.generateMenu()}
-
-                  {this.generateCurrentPage()}
+                    {this.generateCurrentPage()}
                 </Router>
           </Body>                
     )
