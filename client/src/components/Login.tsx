@@ -75,7 +75,7 @@ export default class Login extends Component<AppProps, AppState> {
                 {(!this.props.auth.isAuthenticated()) && (      
                       <LoginStyle>
                         <NavLogo>
-                            Welcome To Udagram
+                            Your Photo Organizer
                         </NavLogo>
                         <NavButton>
                               <Button onClick={this.handleLogin}>

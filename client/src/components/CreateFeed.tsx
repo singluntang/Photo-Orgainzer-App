@@ -102,31 +102,33 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
             <h1>Upload new image</h1>
 
             <Form onSubmit={this.handleSubmit}>
-              <Form.Field>
+              <div className='form-group'>
                 <label>Title</label>
                 <input
                   placeholder="Image title"
                   value={this.state.item.title}
                   onChange={this.handleTitleChange}
+                  className="form-control" 
                 />
-              </Form.Field>
-              <Form.Field>
+              </div>
+              <div className='form-group'>
                 <label>Description</label>
                 <input
                   placeholder="Image Description"
                   value={this.state.item.description}
                   onChange={this.handleDescritionChange}
+                  className="form-control" 
                 />
-              </Form.Field>          
-              <Form.Field>
-                <label>Image</label>
+              </div>          
+              <div>
+                <label>Image&nbsp;&nbsp;</label>
                 <input
                   type="file"
                   accept="image/*"
                   placeholder="Image to upload"
                   onChange={this.handleFileChange}
                 />
-              </Form.Field>
+              </div>
 
               {this.renderButton()}
             </Form>
@@ -139,14 +141,18 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
 
     return (
       <div>
-        {this.state.uploadState === UploadState.UploadingData && <p>Uploading image metadata</p>}
-        {this.state.uploadState === UploadState.UploadingFile && <p>Uploading file</p>}
-        <Button
-          loading={this.state.uploadState !== UploadState.NoUpload}
-          type="submit"
-        >
-          Upload
-        </Button>
+          {(this.state.uploadState !== UploadState.NoUpload) && (
+            <button className="buttonload">
+                <i className="fa fa-refresh fa-spin"></i>Upload
+            </button>
+          )}
+
+          {(this.state.uploadState === UploadState.NoUpload) && (
+            <button className="buttonload">
+                Upload
+            </button>
+          )}          
+
       </div>
     )
   }

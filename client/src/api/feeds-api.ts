@@ -40,6 +40,31 @@ export async function createFeed(
   return await reply.json()
 }
 
+export async function deleteFeed(
+  imageId: string,
+  idToken: string
+): Promise<boolean> {
+
+  try {
+    const reply = await fetch(
+      `${apiEndpoint}/feeds/${imageId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          imageId
+        })
+      }
+    )    
+  } catch (error) {
+    return false
+  }
+  return true
+}
+
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
   await fetch(uploadUrl, {
     method: 'PUT',

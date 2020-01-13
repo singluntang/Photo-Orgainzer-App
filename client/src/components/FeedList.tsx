@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components';
 import { FeedModel } from '../types/FeedModel'
 import { FeedItem } from './FeedItem'
-import { getFeeds } from '../api/feeds-api'
+import { getFeeds  } from '../api/feeds-api'
 import { History } from 'history'
 import Auth from '../auth/Auth'
 import {NavBar} from './Nav'
@@ -54,13 +54,25 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
     this.props.history.push(`/groups/${this.props.match.params.groupId}/feeds`)
   }
 
+  refreshFeed = async (groupId: string, idToken: string) => {
+    try {
+      const feeds = await getFeeds(groupId, idToken)
+      this.setState({
+        feeds
+      })
+      console.log("Refresh Feed")
+    } catch (e) {
+      alert(`Failed to Refresh feeds: ${e.message}`)
+    }
+  }
+
   async componentDidMount() {
     try {
       const feeds = await getFeeds(this.props.match.params.groupId, this.props.auth.idToken)
       this.setState({
         feeds
       })
-      console.log("Create Feed")
+      console.log("Get Feed")
     } catch (e) {
       alert(`Failed to fetch feeds: ${e.message}`)
     }
@@ -78,7 +90,7 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
               </Button>       
               <FeedListStyle>
                 {this.state.feeds.map(feed => {                
-                    return <FeedItem key={feed.imageId} feed={feed} />
+                    return <FeedItem key={feed.imageId} refreshFeed={this.refreshFeed} feed={feed}  auth={this.props.auth}/>
                   })}        
               </FeedListStyle>
           </FeedStyle>

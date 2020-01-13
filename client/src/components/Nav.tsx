@@ -54,7 +54,7 @@ const NavRight = styled.div`
 `;
 const NavLogo = styled(NavLeft)`
   font-family: udagramLogo;
-  font-size: 48px;
+  font-size: 36px;
 `;
 
 interface NavBarProps {
@@ -82,7 +82,7 @@ export class NavBar extends React.PureComponent<NavBarProps, NavBarState> {
         <Nav>
         <NavHeader>
           <NavLeft>
-              <NavLogo>Udagram</NavLogo>
+              <NavLogo>Photo Orainizer</NavLogo>
           </NavLeft>
           <NavCenter></NavCenter>
           <NavRight>
