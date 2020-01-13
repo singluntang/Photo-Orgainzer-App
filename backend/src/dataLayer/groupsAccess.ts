@@ -184,6 +184,44 @@ export class GroupAccess {
     return s3.getSignedUrl('putObject', params)
  
   }
+
+  async deleteFeed(imageId: string) {
+
+    const params = {
+      TableName: this.feedsTable,
+      Key:{
+          "imageId": imageId
+      },
+      ConditionExpression:"imageId = :imageId",   
+      ExpressionAttributeValues:{
+          ":imageId":imageId
+      },
+    };
+
+    await this.docClient.delete(params).promise();
+
+
+    const s3 = new XAWS.S3({
+      signatureVersion: 'v4',
+      region: this.region,
+      params: {Bucket: this.bucketName}
+    });
+    
+    await s3
+      .deleteObject({
+        Bucket: this.bucketName,
+        Key: imageId,
+      })
+      .promise()    
+
+    await s3
+      .deleteObject({
+        Bucket: this.thumbnailBucketName,
+        Key: `${imageId}.jpeg`,
+      })
+      .promise()    
+ 
+  }
   
   async attachUrlToFeed(uploadUrl: string, imageId: string) {
 

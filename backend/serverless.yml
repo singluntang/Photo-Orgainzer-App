@@ -15,7 +15,7 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
@@ -40,11 +40,13 @@ provider:
       Action:
         - s3:PutObject
         - s3:GetObject
+        - s3:DeleteObject
       Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"    
     - Effect: Allow
       Action:
         - s3:PutObject
         - s3:GetObject
+        - s3:DeleteObject
       Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
     - Effect: Allow
       Action:
@@ -132,6 +134,21 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}  
+
+  DeleteFeed:
+    handler: src/lambda/http/deleteFeed.handler
+    events:
+      - http:
+          method: patch
+          path: feeds/{imageId}
+          authorizer: RS256Auth
+          cors: true
+    iamRoleStatementsInherit: true               
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}         
         
   CreateGroup:
     handler: src/lambda/http/createGroup.handler
@@ -270,6 +287,7 @@ resources:
               Action: 
                 - "s3:GetObject"
                 - "s3:PutObject"
+                - "s3:DeleteObject"
               Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
         Bucket: !Ref S3BucketPhotos  
 
@@ -286,6 +304,7 @@ resources:
               Action: 
                 - "s3:GetObject"
                 - "s3:PutObject"
+                - "s3:DeleteObject"
               Resource: 'arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*'
         Bucket: !Ref S3BucketResizePhotos                    
 
