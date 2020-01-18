@@ -66,8 +66,9 @@ export async function deleteFeed(
 }
 
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
+  
   await fetch(uploadUrl, {
-    method: 'PUT',
+    method: 'PUT',   
     body: file
   })
 }

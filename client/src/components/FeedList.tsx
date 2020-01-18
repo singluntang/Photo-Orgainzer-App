@@ -6,6 +6,7 @@ import { getFeeds  } from '../api/feeds-api'
 import { History } from 'history'
 import Auth from '../auth/Auth'
 import {NavBar} from './Nav'
+import { stage } from '../config'
 
 const FeedStyle = styled.div`
   margin-top: 50px;
@@ -51,7 +52,7 @@ export default class FeedList extends React.PureComponent<FeedsListProps, feedsL
   }
 
   handleCreateFeed = () => {
-    this.props.history.push(`/groups/${this.props.match.params.groupId}/feeds`)
+    this.props.history.push(`/${stage}/groups/${this.props.match.params.groupId}/feeds`)
   }
 
   refreshFeed = async (groupId: string, idToken: string) => {

@@ -7,6 +7,7 @@ import { NotFound } from './components/NotFound'
 import  CreateFeed  from './components/CreateFeed'
 import Auth from './auth/Auth'
 import styled from 'styled-components';
+import { stage } from './config'
 
 const Body = styled.div`
   display: flex;
@@ -90,37 +91,11 @@ export default class App extends Component<AppProps, AppState> {
     )
   }
 
-  generateMenu() {
-    return (
-      <Nav>
-          <NavHeader>
-            <NavLeft>
-                <NavLogo>Udagram</NavLogo>
-            </NavLeft>
-            <NavCenter></NavCenter>
-            <NavRight>
-                {this.logInLogOutButton()}
-            </NavRight>
-          </NavHeader>
-      </Nav>
-    )
-  }
-
-  logInLogOutButton() {
-    if (this.props.auth.isAuthenticated()) {
-      return (
-        <Button onClick={this.handleLogout}>
-          Log Out
-        </Button>
-      )
-    }
-  }
-
   generateCurrentPage() {
     return (
       <Switch>
         <Route
-          path="/feeds/:groupId"
+          path={`/${stage}/feeds/:groupId`}
           exact
           render={props => {
             return <FeedList {...props} auth={this.props.auth} />
@@ -128,7 +103,7 @@ export default class App extends Component<AppProps, AppState> {
         />         
 
         <Route
-          path="/groups/:groupId/feeds"
+          path={`/${stage}/groups/:groupId/feeds`}
           exact
           render={props => {
             return <CreateFeed {...props} auth={this.props.auth} />
@@ -136,7 +111,7 @@ export default class App extends Component<AppProps, AppState> {
         />         
 
         <Route
-          path="/"
+          path={`/${stage}`}
           exact
           render={props => {
             return <GroupList {...props} auth={this.props.auth} />
