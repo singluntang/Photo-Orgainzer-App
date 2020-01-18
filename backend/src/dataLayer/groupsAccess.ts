@@ -1,25 +1,35 @@
 import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 var AWSXRay = require('aws-xray-sdk');
-const XAWS = AWSXRay.captureAWS(AWS)
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
 const logger = createLogger('groupAcess')
 
 
+let AWSConect: any
+
+if (process.env.IS_OFFLINE.toLowerCase() === "true") {
+  AWSConect = AWS        
+}
+else {
+  AWSConect = AWSXRay.captureAWS(AWS)
+}
+
+
 export class GroupAccess {
 
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
+    private readonly s3Client: any = createS3Client(),    
     private readonly groupsTable = process.env.GROUPS_TABLE, 
     private readonly feedsTable = process.env.FEEDS_TABLE,
     private readonly bucketName = process.env.IMAGES_S3_BUCKET,
     private readonly thumbnailBucketName = process.env.THUMBNAILS_S3_BUCKET,
-    private readonly region = process.env.BUCKET_REGION,
     private readonly urlExpiration: number = parseInt(process.env.SIGNED_URL_EXPIRATION))    
         
-    {}
+    {
+    }
 
     async createGroup(): Promise<boolean> {
 
@@ -53,15 +63,33 @@ export class GroupAccess {
               DeleteRequest: {
                 Key: { id: '5' }
               }
-            }                      
+            } 
+            ,            
+            {
+              DeleteRequest: {
+                Key: { id: '6' }
+              }
+            } 
+            ,            
+            {
+              DeleteRequest: {
+                Key: { id: '7' }
+              }
+            } 
+            ,            
+            {
+              DeleteRequest: {
+                Key: { id: '8' }
+              }
+            }                                                         
           ]
         }
       }).promise()
       .then(() => {
-        logger.info('Items deleted', '')
+        logger.info('Items deleted', {delete: 'deleted'})
       })
       .catch((e) => {
-        logger.info('Failed to delete', e.message) 
+        logger.info('Failed to delete', {delete: e.message}) 
         error = true
       })
 
@@ -74,8 +102,8 @@ export class GroupAccess {
               PutRequest: {
                 Item: {
                   "id": "1",
-                  "name": "Dogs",
-                  "description": "Only dog images here!"
+                  "name": "Pets",
+                  "description": "Dogs and Cats"
                 }
               }
             },          
@@ -83,8 +111,8 @@ export class GroupAccess {
               PutRequest: {
                 Item: {
                   "id": "2",
-                  "name": "Nature",
-                  "description": "What can be a better object for photography"
+                  "name": "Vacation",
+                  "description": "All my Vacation Pics"
                 }
               }
             },          
@@ -92,8 +120,8 @@ export class GroupAccess {
               PutRequest: {
                 Item: {
                   "id": "3",
-                  "name": "Cities",
-                  "description": "Creative display of urban settings"
+                  "name": "Friends",
+                  "description": "All my Friends Pics"
                 }
               }
             },          
@@ -101,8 +129,8 @@ export class GroupAccess {
               PutRequest: {
                 Item: {
                   "id": "4",
-                  "name": "Computers",
-                  "description": "For the techies among us"
+                  "name": "Family",
+                  "description": "All my Family Pics"
                 }
               }
             },
@@ -111,24 +139,54 @@ export class GroupAccess {
               PutRequest: {
                 Item: {
                   "id": "5",
-                  "name": "Foods",
-                  "description": "For those who like to eat"
+                  "name": "Stars / Adols",
+                  "description": "Singer and Movie Stars"
                 }
               }
-            }            
+            }  
+            ,          
+            {
+              PutRequest: {
+                Item: {
+                  "id": "6",
+                  "name": "un grouped",
+                  "description": "Un-defined Pics"
+                }
+              }
+            } 
+            ,          
+            {
+              PutRequest: {
+                Item: {
+                  "id": "7",
+                  "name": "Cars",
+                  "description": "All type of Cars"
+                }
+              }
+            }
+            ,          
+            {
+              PutRequest: {
+                Item: {
+                  "id": "8",
+                  "name": "Sports",
+                  "description": "All pics related to Sports"
+                }
+              }
+            }                                               
           ]
         }
       }).promise()
       .then(() => {
-        logger.info('Items added', '')
+        logger.info('Items added', {added: 'item added'})
       })
       .catch((e) => {
-        logger.info('Failed to add', e.message) 
+        logger.info('Failed to add', {added: e.message}) 
         error = true
       })
 
       return error
-    }    
+    }   
 
   async getAllGroups(): Promise<any> {
     const result = await this.docClient.scan({
@@ -137,7 +195,7 @@ export class GroupAccess {
 
     const items = result.Items
 
-    logger.info('Getting groups', items) 
+    logger.info('Getting groups', {items}) 
 
     return items 
   }
@@ -170,18 +228,13 @@ export class GroupAccess {
     return items as Feed[]
   }
 
-  getUploadUrl(imageId: string): string {
-
-    const s3 = new XAWS.S3({
-      signatureVersion: 'v4',
-      region: this.region
-    });    
+  async getUploadUrl(imageId: string): Promise<string> {
 
     var params = {Bucket: this.bucketName, Key: imageId, Expires: this.urlExpiration};
 
     logger.info('UrlUpload Param', params)
     
-    return s3.getSignedUrl('putObject', params)
+    return await Promise.resolve(this.s3Client.getSignedUrl('putObject', params))
  
   }
 
@@ -200,21 +253,14 @@ export class GroupAccess {
 
     await this.docClient.delete(params).promise();
 
-
-    const s3 = new XAWS.S3({
-      signatureVersion: 'v4',
-      region: this.region,
-      params: {Bucket: this.bucketName}
-    });
-    
-    await s3
+    await this.s3Client
       .deleteObject({
         Bucket: this.bucketName,
         Key: imageId,
       })
       .promise()    
 
-    await s3
+    await this.s3Client
       .deleteObject({
         Bucket: this.thumbnailBucketName,
         Key: `${imageId}.jpeg`,
@@ -244,54 +290,73 @@ export class GroupAccess {
 
   async processFeedImage(key: string) {
 
-    console.log('Processing S3 item with key: ', key)
-    const s3 = new XAWS.S3({
-      signatureVersion: 'v4',
-      region: this.region,
-      params: {Bucket: this.bucketName}
-    });  
-  
-    const response = await s3
-      .getObject({
-        Bucket: this.bucketName,
-        Key: key
-      })
-      .promise()  
-  
-    const body = response.Body
-    const image = await Jimp.read(body)
-                    .then(image => {
-                      return image
-                      .resize(550, Jimp.AUTO) // resize
-                    })
-                    . then(resizedImg => {
-                      return resizedImg
-                    })
-  
-    logger.info('Buffer',image)
+    logger.info('Processing S3 item with key: ', {key})
 
-    const convertedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
-  
-    logger.info('Writing image back to S3 bucket', this.thumbnailBucketName)
-    await s3
-      .putObject({
-        Bucket: this.thumbnailBucketName,
-        Key: `${key}.jpeg`,
-        Body: convertedBuffer
-      })
-      .promise()
+    try {     
+        const response = await this.s3Client
+          .getObject({
+            Bucket: this.bucketName,
+            Key: key
+          })
+          .promise()  
+      
+        const body = response.Body
+        const image = await Jimp.read(body)
+
+        const resizedImg = await Promise.resolve(image.resize(550, Jimp.AUTO))
+      
+        logger.info('Buffer',{resizedImg})
+
+        const convertedBuffer = await resizedImg.getBufferAsync(Jimp.MIME_JPEG)
+
+        await this.s3Client
+          .putObject({
+            Bucket: this.thumbnailBucketName,
+            Key: `${key}.jpeg`,
+            Body: convertedBuffer
+          })
+          .promise()
+
+          logger.info('Writing image back to S3 bucket', {success: true})          
+    }
+    catch(error) {
+      logger.info('Error in  Processing Image', {error})
+      throw new Error(`Error in  Processing Image: ${error}`);
+    }
 
   }
 }
 
   function createDynamoDBClient() {
-  if (process.env.IS_OFFLINE === "True") {
-    logger.info('Creating a local DynamoDB instance', '')
-    return new XAWS.DynamoDB.DocumentClient({
+  if (process.env.IS_OFFLINE.toLowerCase() === "true") {
+    logger.info('Creating a local DynamoDB instance', {offline: true})
+    return new AWSConect.DynamoDB.DocumentClient({
       region: 'localhost',
       endpoint: 'http://localhost:8000'
     })
   }
 
-  return new XAWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
+  return new AWSConect.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
+}
+
+function createS3Client() {
+  let S3: any
+ /* if (process.env.IS_OFFLINE === "True") {
+    logger.info('Creating a local S3 instance', {})
+    const S3 = new XAWS.S3({
+      s3ForcePathStyle: true,
+      accessKeyId: 'S3RVER', // This specific key is required when working offline
+      secretAccessKey: 'S3RVER',
+    });
+    return S3;
+  }*/
+
+  S3 = new AWSConect.S3({
+    signatureVersion: 'v4',
+    region: process.env.BUCKET_REGION,
+    params: {Bucket: process.env.IMAGES_S3_BUCKET}
+  }); 
+
+
+  return S3;
 }

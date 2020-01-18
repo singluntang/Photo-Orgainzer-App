@@ -1,5 +1,5 @@
 service:
-  name: serverless-udagram-app
+  name: serverless-organizer-app
 
 plugins:
   - serverless-webpack
@@ -9,6 +9,7 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-dynamodb-local
   - serverless-offline 
+  #- serverless-s3-local
 
 package:
   individually: true   
@@ -29,25 +30,20 @@ provider:
     FEEDS_TABLE: Feeds-${self:provider.stage}
     IMAGE_ID_INDEX: ImageIdIndex
     CONNECTIONS_TABLE: Connections-${self:provider.stage}
-    IMAGES_S3_BUCKET: serverless-udagram-sing-images-${self:provider.stage}
-    SIGNED_URL_EXPIRATION: 300
-    THUMBNAILS_S3_BUCKET: serverless-udagram-sing-thumbnail-${self:provider.stage}
+    IMAGES_S3_BUCKET: serverless-organizer-sing-images-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 1000
+    THUMBNAILS_S3_BUCKET: serverless-organizer-sing-thumbnail-${self:provider.stage}
     BUCKET_REGION: ${self:provider.region}
-    IS_OFFLINE: "False"  
+    IS_OFFLINE: "False" 
+    #################################
+    #For Offline Only
+    #################################
+    #LOCAL_IMAGES_S3_BUCKET: local-serverless-organizer-sing-images-${self:provider.stage}
+    #LOCAL_THUMBNAILS_S3_BUCKET: local-serverless-organizer-sing-thumbnail-${self:provider.stage}
+    #LOCAL_IMAGES_ENDPOINT_S3_BUCKET: 'http://localhost:8080'
+    #LOCAL_THUMBNAILS_ENDPOINT_S3_BUCKET: 'http://localhost:8090'     
 
   iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-        - s3:DeleteObject
-      Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"    
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-        - s3:DeleteObject
-      Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
     - Effect: Allow
       Action:
         - xray:PutTraceSegments
@@ -66,24 +62,32 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Udagram API
+        title: Organizer API
         description: Serverless application for images sharing
     models:   
       - name: FeedRequest
         contentType: application/json
         schema: ${file(models/create-feed-request.json)} 
   topicName: imagesTopic-${self:provider.stage}    
-  #serverless-offline:
-  #  port: 3003
-  #  babelOptions:
-  #    presets: ["es2015"]    
-  #dynamodb:
-  #  stages:
-  #    - dev    
-  #  start:
-  #    port: 8000
-  #    inMemory: true
-  #    migrate: true       
+  #################################
+  #For Offline Only
+  ################################# 
+  serverless-offline:
+    port: 3005
+    babelOptions:
+      presets: ["es2015"]    
+  dynamodb:
+    stages:
+      - ${self:provider.stage}     
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true        
+  #s3:
+  #  - port: 8080
+  #    directory: /tmp/${self:provider.environment.LOCAL_IMAGES_S3_BUCKET}    
+  #  - port: 8090
+  #    directory: /tmp/${self:provider.environment.LOCAL_THUMBNAILS_S3_BUCKET}       
 
 functions:
 
@@ -133,7 +137,11 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}  
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:GetSignedUrl
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*          
 
   DeleteFeed:
     handler: src/lambda/http/deleteFeed.handler
@@ -148,7 +156,15 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}         
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:DeleteObject
+        Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"    
+      - Effect: Allow
+        Action:
+          - s3:DeleteObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*                 
         
   CreateGroup:
     handler: src/lambda/http/createGroup.handler
@@ -189,7 +205,15 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}             
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: "arn:aws:s3:::${self:provider.environment.THUMBNAILS_S3_BUCKET}/*"    
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*                     
    
 
 resources:
@@ -344,3 +368,14 @@ resources:
                 Ref: ImagesTopic               
         Topics:
           - !Ref ImagesTopic 
+################################          
+# S3 Bucket For Offline Testing 
+###############################         
+    #LocalS3BucketPhotos:
+    #  Type: AWS::S3::Bucket
+    #  Properties:
+    #    BucketName: ${self:provider.environment.LOCAL_IMAGES_S3_BUCKET}  
+    #LocalS3ThumbnailBucketPhotos:
+    #  Type: AWS::S3::Bucket
+    #  Properties:
+    #    BucketName: ${self:provider.environment.LOCAL_THUMBNAILS_S3_BUCKET}           

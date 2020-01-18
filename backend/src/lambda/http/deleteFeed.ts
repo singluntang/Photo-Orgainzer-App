@@ -13,10 +13,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     await deleteFeed(imageId)
-    logger.info('Delete Item', 'Success')   
+    logger.info('Delete Item', {Success:'Success'})   
   } catch (error) {
     DeleteSuccess = false;
-    logger.info('Delete Item', error)
+    logger.info('Delete Item', {error})
   }
 
 

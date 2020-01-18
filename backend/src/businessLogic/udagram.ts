@@ -18,8 +18,8 @@ export async function processImage(Key) {
   await groupAccess.processFeedImage(Key)
 }
 
-export function getUploadUrl(imageId: string) {
-  return groupAccess.getUploadUrl(imageId)
+export async function getUploadUrl(imageId: string): Promise<string> {
+  return await groupAccess.getUploadUrl(imageId)
 }
 
 export async function deleteFeed(imageId: string) {
