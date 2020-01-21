@@ -1,4 +1,4 @@
-const apiId = '9bg7njyhk9'
+const apiId = '-------'
 
 //export const apiEndpoint = `http://localhost:3005`
 
@@ -8,8 +8,8 @@ export const stage = 'prod'
 export const apiEndpoint = `https://${apiId}.execute-api.us-east-2.amazonaws.com/${stage}`
 
 export const authConfig = {
-  domain: '------',
-  clientId: '------',
+  domain: '-------',
+  clientId: '-------',
   callbackUrl: `http://localhost:3000/callback`
 }
 
