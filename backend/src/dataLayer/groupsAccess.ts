@@ -37,7 +37,7 @@ export class GroupAccess {
 
      await this.docClient.batchWrite({
         RequestItems: {
-          'Groups-dev': [
+          'Groups-prod': [
             {
               DeleteRequest: {
                 Key: { id: '1' }
@@ -97,7 +97,7 @@ export class GroupAccess {
 
       await this.docClient.batchWrite({
         RequestItems: {
-          'Groups-dev': [            
+          'Groups-prod': [            
             {              
               PutRequest: {
                 Item: {
