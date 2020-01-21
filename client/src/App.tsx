@@ -92,6 +92,7 @@ export default class App extends Component<AppProps, AppState> {
   }
 
   generateCurrentPage() {
+    console.log("App.tsx", this.props.auth.idToken)
     return (
       <Switch>
         <Route
@@ -117,8 +118,7 @@ export default class App extends Component<AppProps, AppState> {
             return <GroupList {...props} auth={this.props.auth} />
           }}
         />        
-        
-        <Route component={NotFound} />
+
       </Switch>
     )
   }

@@ -3,6 +3,7 @@ import { apiEndpoint } from '../config'
 import { GroupUploadInfo } from '../types/GroupUploadInfo'
 
 export async function createGroup(idToken: string): Promise<GroupModel> {
+
   const reply = await fetch(`${apiEndpoint}/groups`, {
     method: 'POST',
     headers: {

@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { GroupModel } from '../types/GroupModel'
 import styled from 'styled-components';
+import { stage } from '../config'
 
 const GroupLegend = styled.div`
   margin-top: 80px;
@@ -40,7 +41,7 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
                   <fieldset>
                     <legend>{this.props.group.name}</legend>
                     <GroupDescription>
-                    <Link to={`/feeds/${this.props.group.id}`}>{this.props.group.description}</Link>
+                    <Link to={`/${stage}/feeds/${this.props.group.id}`}>{this.props.group.description}</Link>
                     </GroupDescription>
                   </fieldset>            
               </GroupLegend>

@@ -72,7 +72,7 @@ export default class Login extends Component<AppProps, AppState> {
     
     return (  
             <React.Fragment>
-                {(!this.props.auth.isAuthenticated()) && (      
+   
                       <LoginStyle>
                         <NavLogo>
                             Your Photo Organizer
@@ -83,22 +83,9 @@ export default class Login extends Component<AppProps, AppState> {
                               </Button >                          
                         </NavButton>
                       </LoginStyle> 
-                )}                 
-                {(this.props.auth.isAuthenticated()) && (
-                    this.generateCurrentPage()          
-                )}                 
+              
             </React.Fragment>             
     )
   }
-
-  generateCurrentPage() {
-    return (
-          <Route
-          render={props => {
-            return <App {...props} auth={this.props.auth} />
-          }}
-        />      
-    )
-  }  
 
 }
