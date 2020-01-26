@@ -24,4 +24,4 @@ yarn-error.log*
 
 ~/.vscode-root/*
 
-./client/src/config.ts
+/client/src/config.ts
