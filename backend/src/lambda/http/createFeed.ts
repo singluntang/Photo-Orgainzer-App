@@ -1,9 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import { createFeed, getUploadUrl } from '../../businessLogic/udagram'
+import { createFeed, getUploadUrl, uploadFile } from '../../businessLogic/udagram'
 import { CreateFeedRequest } from '../../requests/CreateFeedRequest'
 import { Feed } from '../../models/Feed'
 import { createLogger } from '../../utils/logger'
+
 
 const logger = createLogger('createFeed')
 
@@ -18,9 +19,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   logger.info('New Item', newItem)
 
-  const url: any = await getUploadUrl(newItem.imageId)
+  let url: string
 
- logger.info('Upload Url', {url})
+  if (process.env.IS_OFFLINE.toLowerCase() !== "true") {
+      url = await getUploadUrl(newItem.imageId)
+  }
+  else {
+      url = process.env.THUMBNAILS_S3_BUCKET_ENDPOINT
+  }      
+
+  logger.info('Upload Url', {url})
 
   return {
     statusCode: 201,

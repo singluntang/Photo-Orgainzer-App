@@ -1,21 +1,11 @@
-import * as AWS  from 'aws-sdk'
+const AWSXrayConect = require('aws-xray-sdk');
+const AWSConect = require('aws-sdk');
+const S3Conect = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-var AWSXRay = require('aws-xray-sdk');
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
 const logger = createLogger('groupAcess')
-
-
-let AWSConect: any
-
-if (process.env.IS_OFFLINE.toLowerCase() === "true") {
-  AWSConect = AWS        
-}
-else {
-  AWSConect = AWSXRay.captureAWS(AWS)
-}
-
 
 export class GroupAccess {
 
@@ -37,7 +27,7 @@ export class GroupAccess {
 
      await this.docClient.batchWrite({
         RequestItems: {
-          'Groups-prod': [
+          'Groups-dev': [
             {
               DeleteRequest: {
                 Key: { id: '1' }
@@ -97,7 +87,7 @@ export class GroupAccess {
 
       await this.docClient.batchWrite({
         RequestItems: {
-          'Groups-prod': [            
+          'Groups-dev': [            
             {              
               PutRequest: {
                 Item: {
@@ -288,8 +278,19 @@ export class GroupAccess {
  
   }
 
+  async uploadFile(imageId: string, file: Buffer): Promise<void> {
+    
+    await this.s3Client.putObject({
+      Bucket: this.thumbnailBucketName,
+      Key: imageId,
+      Body: file,
+    }, () => {});
+ 
+  }
+
   async processFeedImage(key: string) {
 
+    
     logger.info('Processing S3 item with key: ', {key})
 
     try {     
@@ -327,36 +328,36 @@ export class GroupAccess {
   }
 }
 
-  function createDynamoDBClient() {
+function createDynamoDBClient() {
   if (process.env.IS_OFFLINE.toLowerCase() === "true") {
     logger.info('Creating a local DynamoDB instance', {offline: true})
     return new AWSConect.DynamoDB.DocumentClient({
       region: 'localhost',
-      endpoint: 'http://localhost:8000'
+      endpoint: process.env.DYNAMODB_ENDPOINT
     })
   }
 
-  return new AWSConect.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
+  return new AWSXrayConect.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
 }
 
 function createS3Client() {
   let S3: any
- /* if (process.env.IS_OFFLINE === "True") {
+  if (process.env.IS_OFFLINE.toLowerCase() === "true") {
     logger.info('Creating a local S3 instance', {})
-    const S3 = new XAWS.S3({
+    const S3 = new S3Conect.S3({
       s3ForcePathStyle: true,
       accessKeyId: 'S3RVER', // This specific key is required when working offline
       secretAccessKey: 'S3RVER',
+      endpoint: new AWSConect.Endpoint(process.env.THUMBNAILS_S3_BUCKET_ENDPOINT),
     });
     return S3;
-  }*/
+  }
 
-  S3 = new AWSConect.S3({
+  S3 = new AWSXrayConect.S3({
     signatureVersion: 'v4',
     region: process.env.BUCKET_REGION,
     params: {Bucket: process.env.IMAGES_S3_BUCKET}
   }); 
-
 
   return S3;
 }

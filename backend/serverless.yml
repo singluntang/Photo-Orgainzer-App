@@ -8,14 +8,17 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-dynamodb-local
   - serverless-offline 
-  #- serverless-s3-local
+  - serverless-s3-local
+  - serverless-apigw-binary
 
 package:
   individually: true   
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs8.10.0
+  memorySize: 128
+  timeout: 10  
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
@@ -33,14 +36,12 @@ provider:
     SIGNED_URL_EXPIRATION: 1000
     THUMBNAILS_S3_BUCKET: serverless-organizer-sing-thumbnail-${self:provider.stage}
     BUCKET_REGION: ${self:provider.region}
-    IS_OFFLINE: "False" 
+    IS_OFFLINE: "True" 
     #################################
     #For Offline Only
     #################################
-    #LOCAL_IMAGES_S3_BUCKET: local-serverless-organizer-sing-images-${self:provider.stage}
-    #LOCAL_THUMBNAILS_S3_BUCKET: local-serverless-organizer-sing-thumbnail-${self:provider.stage}
-    #LOCAL_IMAGES_ENDPOINT_S3_BUCKET: 'http://localhost:8080'
-    #LOCAL_THUMBNAILS_ENDPOINT_S3_BUCKET: 'http://localhost:8090'     
+    THUMBNAILS_S3_BUCKET_ENDPOINT: 'http://localhost:5000'
+    DYNAMODB_ENDPOINT: 'http://localhost:8000'
 
   iamRoleStatements:
     - Effect: Allow
@@ -81,12 +82,13 @@ custom:
     start:
       port: 8000
       inMemory: true
-      migrate: true        
-  #s3:
-  #  - port: 8080
-  #    directory: /tmp/${self:provider.environment.LOCAL_IMAGES_S3_BUCKET}    
-  #  - port: 8090
-  #    directory: /tmp/${self:provider.environment.LOCAL_THUMBNAILS_S3_BUCKET}       
+      migrate: true
+  apigwBinary:
+    types:
+      - '*/*'              
+  s3:
+    port: 5000
+    directory: ./s3-local       
 
 functions:
 
@@ -113,9 +115,7 @@ functions:
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.FEEDS_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}        
-    #deploymentSettings:
-    #  type: Linear10PercentEvery1Minute
-    #  alias: Live        
+      
 
   CreateFeed:
     handler: src/lambda/http/createFeed.handler
@@ -182,10 +182,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:BatchWriteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}               
-    #deploymentSettings:
-    #  type: Linear10PercentEvery1Minute
-    #  alias: Live        
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}                     
        
   Resize:           
     handler: src/lambda/s3/resizeImage.handler
@@ -212,7 +209,23 @@ functions:
       - Effect: Allow
         Action:
           - s3:GetObject
-        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*                     
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/* 
+
+
+  UploadImageFilessss:
+    api:
+      handler: src/lambda/http/uploadFile.express
+      events:
+        - http: ANY {proxy+}
+        - http: ANY /
+
+  s3hook:
+    handler: src/lambda/http/uploadFile.s3hook
+    environment:
+      ENV_000: 123
+      ENV_001: 456
+    events:
+      - s3: ${self:provider.environment.THUMBNAILS_S3_BUCKET}                              
    
 
 resources:
