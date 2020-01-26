@@ -23,3 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 ~/.vscode-root/*
+
+./client/src/config.ts
