@@ -4,6 +4,7 @@ import App  from '../App'
 import { Route, Switch } from 'react-router-dom'
 import Auth from '../auth/Auth'
 import styled from 'styled-components';
+import { stage } from '../config'
 
 const Button = styled.button`
   cursor: pointer;
@@ -31,6 +32,10 @@ const LoginStyle = styled.div`
   margin-top: -150px;
   margin-left: -350px;
   align-items: center;  
+`;
+const NavMode = styled.div`
+  font-family: verdana,arial,sans-serif;
+  font-size: 60px;
 `;
 const NavLogo = styled.div`
   font-family: udagramLogo;
@@ -65,7 +70,9 @@ export default class Login extends Component<AppProps, AppState> {
   }
 
   handleLogin() {
-    this.props.auth.login()
+   
+        this.props.auth.login()
+
   } 
 
   render() {
@@ -74,6 +81,11 @@ export default class Login extends Component<AppProps, AppState> {
             <React.Fragment>
    
                       <LoginStyle>
+                        {(stage.localeCompare("dev")==0) && (
+                            <NavMode>
+                                Offline - Mode
+                            </NavMode>
+                        )}
                         <NavLogo>
                             Your Photo Organizer
                         </NavLogo>

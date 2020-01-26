@@ -40,6 +40,8 @@ export async function createFeed(
   return await reply.json()
 }
 
+
+
 export async function deleteFeed(
   imageId: string,
   idToken: string
@@ -72,3 +74,18 @@ export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void>
     body: file
   })
 }
+
+
+//-----------------------------------------------This part is for Offline Local-------------------------------------------
+
+export async function uploadFileLocal(uploadUrl: string, file: Buffer, imageId: string): Promise<void> {
+  console.log(file)
+  await fetch('http://localhost:3005', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'image/jpeg'
+    },       
+    body: file
+  })
+}
+

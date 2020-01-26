@@ -1,11 +1,12 @@
 import * as React from 'react'
-import { createFeed, uploadFile } from '../api/feeds-api'
+import { createFeed, uploadFile, uploadFileLocal } from '../api/feeds-api'
 import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { ImageUploadInfo } from '../types/ImageUploadInfo'
 import { ImageUploadResponse } from '../types/ImageUploadResponse'
 import {NavBar} from './Nav'
 import { History } from 'history'
+import { stage } from '../config'
 
 enum UploadState {
   NoUpload,
@@ -63,6 +64,7 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
   handleSubmit = async (event: React.SyntheticEvent) => {
       
     event.preventDefault()
+    let uploadInfo: ImageUploadResponse
 
     try {
       if (!this.state.file) {
@@ -71,12 +73,21 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
       }
 
       this.setUploadState(UploadState.UploadingData)
-      const uploadInfo: ImageUploadResponse = await createFeed(this.props.auth.getIdToken(), this.state.item)
+
+      
+      uploadInfo = await createFeed(this.props.auth.getIdToken(), this.state.item)
 
       console.log('Created image', uploadInfo)
 
       this.setUploadState(UploadState.UploadingFile)
-      await uploadFile(uploadInfo.uploadUrl, this.state.file)
+    
+
+      if (stage.localeCompare("prod")==0) {          
+          await uploadFile(uploadInfo.uploadUrl, this.state.file)
+      }
+      else {
+          await uploadFileLocal(uploadInfo.uploadUrl, this.state.file, uploadInfo.newItem.imageId)
+      }
 
       alert('Image was uploaded!')
     } catch (e) {

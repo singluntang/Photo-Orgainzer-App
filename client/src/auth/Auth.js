@@ -1,5 +1,6 @@
 import auth0 from 'auth0-js';
 import { authConfig } from '../config';
+import { stage } from '../config'
 
 export default class Auth {
   accessToken;
@@ -27,7 +28,9 @@ export default class Auth {
   }
 
   login() {
+    
       this.auth0.authorize();
+    
   }
 
   handleAuthentication() {
@@ -63,7 +66,7 @@ export default class Auth {
     this.expiresAt = expiresAt;
 
     // navigate to the home route
-    this.history.replace('/prod');
+    this.history.replace(`/${stage}`);
   }
 
   renewSession() {
