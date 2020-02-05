@@ -81,15 +81,18 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
 
       this.setUploadState(UploadState.UploadingFile)
     
-
+      let uploadStatus
       if (stage.localeCompare("prod")==0) {          
           await uploadFile(uploadInfo.uploadUrl, this.state.file)
       }
       else {
-          await uploadFileLocal(uploadInfo.uploadUrl, this.state.file, uploadInfo.newItem.imageId)
+         uploadStatus = await uploadFileLocal(this.state.file, uploadInfo.newItem.imageId);
+
+         (uploadStatus) ? alert('Image was uploaded!') : alert('uploaded unsuccessful!')
       }
 
-      alert('Image was uploaded!')
+      
+
     } catch (e) {
       alert('Could not upload an image: ' + e.message)
     } finally {
@@ -135,6 +138,7 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
                 <label>Image&nbsp;&nbsp;</label>
                 <input
                   type="file"
+                  name="imageFile"
                   accept="image/*"
                   placeholder="Image to upload"
                   onChange={this.handleFileChange}

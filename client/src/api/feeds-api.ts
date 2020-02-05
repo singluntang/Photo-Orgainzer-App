@@ -78,14 +78,26 @@ export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void>
 
 //-----------------------------------------------This part is for Offline Local-------------------------------------------
 
-export async function uploadFileLocal(uploadUrl: string, file: Buffer, imageId: string): Promise<void> {
-  console.log(file)
-  await fetch('http://localhost:3005', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'image/jpeg'
-    },       
-    body: file
+export async function uploadFileLocal(file: any, imageId: string): Promise<boolean> {
+
+  const data64 = file.toString('base64')
+  var base64data = new Buffer(data64, 'binary');
+
+  console.log("Upload File",base64data)
+
+  let reply = await fetch(`${apiEndpoint}/imageUpload/${imageId}`, {
+    method: 'PUT',            
+    body: base64data
   })
+
+  let result: any = await reply.json()
+
+  //if(result.status)  {
+  //  reply = await fetch(`${apiEndpoint}/processimage/${imageId}`)    
+  //  result = await reply.json()
+  //}
+
+  return result.status
+
 }
 
