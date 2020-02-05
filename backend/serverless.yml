@@ -16,7 +16,7 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs8.10.0
+  runtime: nodejs12.x
   memorySize: 128
   timeout: 10  
 
@@ -40,7 +40,7 @@ provider:
     #################################
     #For Offline Only
     #################################
-    THUMBNAILS_S3_BUCKET_ENDPOINT: 'http://localhost:5000'
+    S3_BUCKET_ENDPOINT: 'http://localhost:5000'
     DYNAMODB_ENDPOINT: 'http://localhost:8000'
 
   iamRoleStatements:
@@ -85,10 +85,10 @@ custom:
       migrate: true
   apigwBinary:
     types:
-      - '*/*'              
+      - 'image/jpeg'             
   s3:
     port: 5000
-    directory: ./s3-local       
+    directory: /tmp
 
 functions:
 
@@ -212,20 +212,15 @@ functions:
         Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/* 
 
 
-  UploadImageFilessss:
-    api:
-      handler: src/lambda/http/uploadFile.express
-      events:
-        - http: ANY {proxy+}
-        - http: ANY /
-
-  s3hook:
-    handler: src/lambda/http/uploadFile.s3hook
-    environment:
-      ENV_000: 123
-      ENV_001: 456
+  UploadImageFile:
+    handler: src/lambda/http/uploadFile.handler
     events:
-      - s3: ${self:provider.environment.THUMBNAILS_S3_BUCKET}                              
+      - http: ANY /imageUpload/{imageId}        
+      
+  ProcessImageFile:
+    handler: src/lambda/s3/resizeLocalImage.handler
+    events:
+      - http: ANY /processimage/{imageId}        
    
 
 resources:

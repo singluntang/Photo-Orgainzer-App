@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import { createFeed, getUploadUrl, uploadFile } from '../../businessLogic/udagram'
+import { createFeed, getUploadUrl } from '../../businessLogic/udagram'
 import { CreateFeedRequest } from '../../requests/CreateFeedRequest'
 import { Feed } from '../../models/Feed'
 import { createLogger } from '../../utils/logger'

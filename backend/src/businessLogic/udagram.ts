@@ -14,7 +14,7 @@ export async function getGroupFeeds(groupId: string): Promise<Feed[]> {
   return groupAccess.getGroupFeeds(groupId)
 }
 
-export async function processImage(Key) {  
+export async function processImage(Key: string) {  
   await groupAccess.processFeedImage(Key)
 }
 
@@ -22,7 +22,7 @@ export async function getUploadUrl(imageId: string): Promise<string> {
   return await groupAccess.getUploadUrl(imageId)
 }
 
-export async function uploadFile(imageId: string, file: Buffer): Promise<void> {
+export async function uploadFile(imageId: string, file: string): Promise<void> {
   await groupAccess.uploadFile(imageId,file)
 }
 

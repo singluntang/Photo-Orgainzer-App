@@ -18,6 +18,7 @@
     "jimp": "^0.6.8",
     "jsonwebtoken": "^8.5.1",
     "middy": "^0.32.3",
+    "multer": "^1.4.2",
     "serverless-dynamodb-local": "^0.2.38",
     "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-offline": "^5.12.1",
@@ -42,7 +43,7 @@
     "webpack": "^4.35.3",
     "webpack-node-externals": "^1.7.2",
     "nodemon": "^1.11.0",
-    "serverless": "~1.26.1"    
+    "serverless": "~1.26.1"
   },
   "author": "Tang Sing Lun",
   "license": "MIT"

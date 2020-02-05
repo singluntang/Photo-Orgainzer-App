@@ -278,14 +278,12 @@ export class GroupAccess {
  
   }
 
-  async uploadFile(imageId: string, file: Buffer): Promise<void> {
-    
+  async uploadFile(imageId: string, file: string): Promise<void> {
     await this.s3Client.putObject({
-      Bucket: this.thumbnailBucketName,
+      Bucket: this.bucketName,
       Key: imageId,
       Body: file,
     }, () => {});
- 
   }
 
   async processFeedImage(key: string) {
@@ -293,20 +291,24 @@ export class GroupAccess {
     
     logger.info('Processing S3 item with key: ', {key})
 
-    try {     
-        const response = await this.s3Client
-          .getObject({
+    try { 
+      
+        const get_param = {
             Bucket: this.bucketName,
-            Key: key
-          })
-          .promise()  
+            Key: key,
+        };      
+
+        const response = await  this.s3Client.getObject(get_param).promise()
+          
+          
+        logger.info('Orginal Image',{"data": response.Body})
       
         const body = response.Body
         const image = await Jimp.read(body)
 
         const resizedImg = await Promise.resolve(image.resize(550, Jimp.AUTO))
       
-        logger.info('Buffer',{resizedImg})
+        logger.info('Resized Image',{resizedImg})
 
         const convertedBuffer = await resizedImg.getBufferAsync(Jimp.MIME_JPEG)
 
@@ -318,7 +320,7 @@ export class GroupAccess {
           })
           .promise()
 
-          logger.info('Writing image back to S3 bucket', {success: true})          
+          logger.info('Writing image back to S3 bucket', {success: true})       
     }
     catch(error) {
       logger.info('Error in  Processing Image', {error})
@@ -326,6 +328,7 @@ export class GroupAccess {
     }
 
   }
+
 }
 
 function createDynamoDBClient() {
@@ -348,7 +351,7 @@ function createS3Client() {
       s3ForcePathStyle: true,
       accessKeyId: 'S3RVER', // This specific key is required when working offline
       secretAccessKey: 'S3RVER',
-      endpoint: new AWSConect.Endpoint(process.env.THUMBNAILS_S3_BUCKET_ENDPOINT),
+      endpoint: new AWSConect.Endpoint(process.env.S3_BUCKET_ENDPOINT),
     });
     return S3;
   }

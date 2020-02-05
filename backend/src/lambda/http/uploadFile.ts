@@ -1,22 +1,35 @@
 const express = require('express');
 const awsServerlessExpress = require('aws-serverless-express');
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
+import { createLogger } from '../../utils/logger'
+import * as fs from 'fs'
+var multer  = require('multer')
+var upload = multer({ dest: 'uploads/' })
+
+const logger = createLogger('uploadFile')
+
 const binaryMimeTypes = [
-  'image/gif',
-  'text/css',
-  'text/html'
+  'image/jpeg'
 ];
-const app = new express();
+const app = express();
+const bucketName = process.env.IMAGES_S3_BUCKET
 
-app.use(awsServerlessExpressMiddleware.eventContext());
-app.set('view engine', 'html');
+app.post('/imageUpload/:imageId', upload.single('imageFile'), function (req, res, next) {
+  // req.file is the `avatar` file
+  const fileName: string = `${req.event.pathParameters.imageId}.jpeg`
+  logger.info('file name', {fileName: upload.fileName});
+  // destination.txt will be created or overwritten by default.
+ /* fs.copyFile(`${upload.path}/${upload.fileName}`, `/tmp/${bucketName}/${fileName}`, (err) => {
+    if (err) {
+      logger.info("ERROR UPLOAD", {err});
+    }
+  
+    logger.info('File Upload', {Status: "Success!"});
+    res.send(JSON.stringify({
+      status: true
+      }))      
+  }) */
+})
 
-app.use('/', express.static('dist', {index: false}));
+const server = awsServerlessExpress.createServer(app,null,binaryMimeTypes)
 
-app.get('/', (req,res) => {
-    res.sendFile('car2.jpeg', { root: "../../images" });
-});
-
-const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
-
-module.exports.express = (event, context) => awsServerlessExpress.proxy(server, event, context);
+exports.handler = (event, context) => { awsServerlessExpress.proxy(server, event, context) }

@@ -1,44 +1,38 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { uploadFile } from '../../businessLogic/udagram'
-import { UploadFeedRequest } from '../../requests/uploadFeedRequest'
+const express = require('express');
+const awsServerlessExpress = require('aws-serverless-express');
+const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
 import { createLogger } from '../../utils/logger'
 
-const logger = createLogger('createFeed')
+const logger = createLogger('uploadFile')
 
+const binaryMimeTypes = [
+  'image/jpeg'
+];
+const app = express();
 
-//module.exports.handler = async (event, context, callback) => {
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {  
+app.use(awsServerlessExpressMiddleware.eventContext());
 
-  const uploadFeed: any = JSON.parse(event.body) 
-  
-  logger.info('Upload Url', uploadFeed)
+logger.info("Message", {"Statement": "Out side"})
 
-  logger.info('Image Buffer---------------------', uploadFeed)
+app.put('/image/:imageId', async (req,res, next) => {
 
-  //await uploadFile(uploadFeed.imageId,uploadFeed.uploadfile)
+  try {
 
-  return {
-    statusCode: 201,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },    
-    body: ''
+     //const jsonData = req.apiGateway.event.body.toJSON()
+
+     await uploadFile(req.apiGateway.event.pathParameters.imageId,req.apiGateway.event.body)  
+
+     res.send(JSON.stringify({
+         status: true
+        }))
+
+  } catch (error) {
+      next(error)
   }
+    
+});
 
-};
+const server = awsServerlessExpress.createServer(app,null,binaryMimeTypes)
 
-export const s3hook = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => { 
-  console.log(JSON.stringify(event));
-  console.log(JSON.stringify(process.env));
-
-  return {
-    statusCode: 201,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },    
-    body: ''
-  }
-
-};
+exports.handler = (event, context) => { awsServerlessExpress.proxy(server, event, context) }
