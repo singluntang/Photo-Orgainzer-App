@@ -1,8 +1,10 @@
 import { APIGatewayEvent, Context, Callback } from 'aws-lambda';
-import { processImage } from '../../businessLogic/udagram'
+import { processImage, attachUrlToFeed } from '../../businessLogic/udagram'
 import { createLogger } from '../../utils/logger'
 
 const logger = createLogger('resizeLocalImage')
+const s3EndPoint = process.env.S3_BUCKET_ENDPOINT
+const thumbnailBucket = process.env.THUMBNAILS_S3_BUCKET
 
 export async function handler(
   event: APIGatewayEvent,
@@ -16,7 +18,13 @@ export async function handler(
 
     //const jsonData = req.apiGateway.event.body.toJSON()
 
-    await processImage(event.pathParameters.imageId)  
+    await processImage(event.pathParameters.imageId) 
+    
+    const imageUrl: string = `${s3EndPoint}/${thumbnailBucket}/${event.pathParameters.imageId}.jpeg`
+
+    logger.info('imageUrl', {imageUrl})    
+
+    await attachUrlToFeed(imageUrl, event.pathParameters.imageId)     
 
     return {
     statusCode: 201,
