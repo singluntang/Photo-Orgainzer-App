@@ -5,7 +5,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
-const logger = createLogger('groupAcess')
+const logger = createLogger('groupAccess')
 
 export class GroupAccess {
 
@@ -278,11 +278,14 @@ export class GroupAccess {
  
   }
 
-  async uploadFile(imageId: string, file: string): Promise<void> {
+  async uploadFile(imageId: string, imageBase64: any): Promise<void> {
+
+    logger.info('Storing S3 item in Base64 Buffer: ', {imageBase64})
+
     await this.s3Client.putObject({
       Bucket: this.bucketName,
       Key: imageId,
-      Body: file,
+      Body: imageBase64,
     }, () => {});
   }
 
@@ -292,7 +295,8 @@ export class GroupAccess {
     logger.info('Processing S3 item with key: ', {key})
 
     try { 
-      
+
+     
         const get_param = {
             Bucket: this.bucketName,
             Key: key,
@@ -301,9 +305,15 @@ export class GroupAccess {
         const response = await  this.s3Client.getObject(get_param).promise()
           
           
-        logger.info('Orginal Image',{"data": response.Body})
+        logger.info('Encoded Image',{"data": response.Body})
       
-        const body = response.Body
+        let body = response.Body
+
+        //if (process.env.IS_OFFLINE.toLowerCase() === "true") {
+        //    body = Buffer.from(body,'base64')          
+        //    logger.info('Decoded Base64 Data',{"bodydata": body})
+        //}
+
         const image = await Jimp.read(body)
 
         const resizedImg = await Promise.resolve(image.resize(550, Jimp.AUTO))

@@ -10,6 +10,7 @@ plugins:
   - serverless-offline 
   - serverless-s3-local
   - serverless-apigw-binary
+  - serverless-apigwy-binary
 
 package:
   individually: true   
@@ -85,7 +86,8 @@ custom:
       migrate: true
   apigwBinary:
     types:
-      - 'image/jpeg'             
+      - 'image/jpeg' 
+      - '*/*'            
   s3:
     port: 5000
     directory: /tmp
@@ -215,7 +217,20 @@ functions:
   UploadImageFile:
     handler: src/lambda/http/uploadFile.handler
     events:
-      - http: ANY /imageUpload/{imageId}        
+      - http: ANY /imageUpload/{imageId}  
+      - contentHandling: CONVERT_TO_BINARY 
+
+  # UploadImageFile:
+  #   handler: src/lambda/http/uploadFile.handler
+  #   events:
+  #     - s3:
+  #         bucket: ${self:provider.environment.IMAGES_S3_BUCKET}
+  #         event: s3:ObjectCreated:*
+  #         rules:
+  #           - prefix: incoming/
+  #           - suffix: .jpg
+
+
       
   ProcessImageFile:
     handler: src/lambda/s3/resizeLocalImage.handler

@@ -22,8 +22,8 @@ export async function getUploadUrl(imageId: string): Promise<string> {
   return await groupAccess.getUploadUrl(imageId)
 }
 
-export async function uploadFile(imageId: string, file: string): Promise<void> {
-  await groupAccess.uploadFile(imageId,file)
+export async function uploadFile(imageId: string, imageBase64: any): Promise<void> {
+  await groupAccess.uploadFile(imageId,imageBase64)
 }
 
 export async function deleteFeed(imageId: string) {

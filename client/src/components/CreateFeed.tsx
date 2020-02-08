@@ -14,6 +14,7 @@ enum UploadState {
   UploadingFile,
 }
 
+
 interface CreateFeedProps {
   history: History
   match: {
@@ -27,8 +28,11 @@ interface CreateFeedProps {
 interface createFeedState {
   item: ImageUploadInfo
   file: any
+  imageBase64: any
   uploadState: UploadState
 }
+
+
 
 export default class CreateFeed extends React.PureComponent<CreateFeedProps, createFeedState> {
   state: createFeedState = {
@@ -36,6 +40,7 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
            title: '', 
            description: ''},
     file: undefined,
+    imageBase64: {base64data: ''},
     uploadState: UploadState.NoUpload
   }
 
@@ -53,12 +58,30 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
+    var base64data: any;
+
     if (!files) return
 
-    console.log('File change', files)
+
+    const reader = new FileReader();
+
+    reader.addEventListener("load",() => (function(cb){
+      base64data = reader.result;        
+      cb(files, base64data);                
+    })(this.cb), false);         
+  
+    if (files) {      
+      reader.readAsDataURL(files[0]);
+    }
+
+  }
+
+      
+  cb = (files: any, base64data: any) => {        
     this.setState({
-      file: files[0]
-    })
+      file: files[0],
+      imageBase64: base64data
+    }) 
   }
 
   handleSubmit = async (event: React.SyntheticEvent) => {
@@ -86,7 +109,7 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
           await uploadFile(uploadInfo.uploadUrl, this.state.file)
       }
       else {
-         uploadStatus = await uploadFileLocal(this.state.file, uploadInfo.newItem.imageId);
+         uploadStatus = await uploadFileLocal(this.state.imageBase64, uploadInfo.newItem.imageId);
 
          (uploadStatus) ? alert('Image was uploaded!') : alert('uploaded unsuccessful!')
       }
@@ -109,6 +132,7 @@ export default class CreateFeed extends React.PureComponent<CreateFeedProps, cre
 
 
   render() {
+
     return (
       <React.Fragment>
           <NavBar {...this.props} auth={this.props.auth} />      

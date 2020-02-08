@@ -2,6 +2,7 @@ import { apiEndpoint } from '../config'
 import { FeedModel } from '../types/FeedModel'
 import { ImageUploadInfo } from '../types/ImageUploadInfo'
 import { ImageUploadResponse } from '../types/ImageUploadResponse'
+const fs = require('fs');
 
 export async function getFeeds(groupId: string, idToken: string): Promise<FeedModel[]> {
   console.log('Fetching Feeds')
@@ -78,24 +79,25 @@ export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void>
 
 //-----------------------------------------------This part is for Offline Local-------------------------------------------
 
-export async function uploadFileLocal(file: any, imageId: string): Promise<boolean> {
+export async function uploadFileLocal(imageBase64: any, imageId: string): Promise<boolean> {
 
-  const data64 = file.toString('base64')
-  var base64data = new Buffer(data64, 'binary');
-
-  console.log("Upload File",base64data)
+  console.log("image base data 64", imageBase64)
+  
 
   let reply = await fetch(`${apiEndpoint}/imageUpload/${imageId}`, {
-    method: 'PUT',            
-    body: base64data
+    method: 'POST', 
+    headers: {
+      'Content-Type': 'image/jpeg'
+    },               
+    body: imageBase64
   })
 
   let result: any = await reply.json()
 
-  //if(result.status)  {
-  //  reply = await fetch(`${apiEndpoint}/processimage/${imageId}`)    
-  //  result = await reply.json()
-  //}
+  if(result.status)  {
+    reply = await fetch(`${apiEndpoint}/processimage/${imageId}`)    
+    result = await reply.json()
+  }
 
   return result.status
 
