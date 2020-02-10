@@ -1,11 +1,14 @@
 const AWSXrayConect = require('aws-xray-sdk');
 const AWSConect = require('aws-sdk');
 const S3Conect = require('aws-sdk');
+const AWS = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
 const logger = createLogger('groupAcess')
+
+
 
 export class GroupAccess {
 
@@ -363,10 +366,10 @@ function createDynamoDBClient() {
       region: 'localhost',
       endpoint: process.env.DYNAMODB_ENDPOINT
     })
-  }
-  else {
-    XAWS = AWSXrayConect.captureAWS(AWSConect)
-  }
+  } 
+  
+  XAWS = AWSXrayConect.captureAWS(AWS);
+  
   
   return new XAWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
 }
@@ -384,11 +387,10 @@ function createS3Client() {
     return S3;
   }
 
-  S3 = new AWSXrayConect.S3({
-    signatureVersion: 'v4',
+  S3 = new AWS.S3({    
     region: process.env.BUCKET_REGION,
     params: {Bucket: process.env.IMAGES_S3_BUCKET}
   }); 
 
-  return S3;
+  return AWSXrayConect.captureAWSClient(S3);
 }
