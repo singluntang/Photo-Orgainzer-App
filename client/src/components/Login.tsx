@@ -35,7 +35,7 @@ const LoginStyle = styled.div`
 `;
 const NavMode = styled.div`
   font-family: verdana,arial,sans-serif;
-  font-size: 60px;
+  font-size: 50px;
 `;
 const NavLogo = styled.div`
   font-family: udagramLogo;
@@ -81,9 +81,9 @@ export default class Login extends Component<AppProps, AppState> {
             <React.Fragment>
    
                       <LoginStyle>
-                        {(stage.localeCompare("dev")==0) && (
+                        {(stage.localeCompare("prod")!=0) && (
                             <NavMode>
-                                Offline - Mode
+                                Offline - Mode (stage - {stage})
                             </NavMode>
                         )}
                         <NavLogo>

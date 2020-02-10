@@ -22,25 +22,17 @@ const handleAuthentication = (props: any) => {
 }
 
 export const makeAuthRouting = () => {
-
-  return (
+  
+  return (    
     <Router history={history}>
       <div>
         <Route
             exact
-            path="/prod/login"
+            path = {`/${stage}/login`}
             render={props => {
               return <Login auth={auth} {...props} />
             }}
           />                 
-
-        <Route
-          path="/dev/login"
-          exact
-          render={props => {
-            return <Login auth={auth} {...props} />
-          }}
-        /> 
 
         <Route
           exact

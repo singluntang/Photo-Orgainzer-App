@@ -5,13 +5,13 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { Feed } from '../models/Feed'
 import { createLogger } from '../utils/logger'
 import Jimp from 'jimp';
-const logger = createLogger('groupAccess')
+const logger = createLogger('groupAcess')
 
 export class GroupAccess {
 
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
-    private readonly s3Client: any = createS3Client(),    
+    private readonly s3Client: any = createS3Client(),        
     private readonly groupsTable = process.env.GROUPS_TABLE, 
     private readonly feedsTable = process.env.FEEDS_TABLE,
     private readonly bucketName = process.env.IMAGES_S3_BUCKET,
@@ -24,159 +24,178 @@ export class GroupAccess {
     async createGroup(): Promise<boolean> {
 
       let error: boolean = false;
-
-     await this.docClient.batchWrite({
-        RequestItems: {
-          'Groups-dev': [
-            {
-              DeleteRequest: {
-                Key: { id: '1' }
-              }
-            },            
-            {
-              DeleteRequest: {
-                Key: { id: '2' }
-              }
-            },                        
-            {
-              DeleteRequest: {
-                Key: { id: '3' }
-              }
-            },            
-            {
-              DeleteRequest: {
-                Key: { id: '4' }
-              }
-            } 
-            ,            
-            {
-              DeleteRequest: {
-                Key: { id: '5' }
-              }
-            } 
-            ,            
-            {
-              DeleteRequest: {
-                Key: { id: '6' }
-              }
-            } 
-            ,            
-            {
-              DeleteRequest: {
-                Key: { id: '7' }
-              }
-            } 
-            ,            
-            {
-              DeleteRequest: {
-                Key: { id: '8' }
-              }
-            }                                                         
-          ]
+  
+      const tableName = this.groupsTable
+  
+  
+      logger.info("tableName", {tableName} )
+  
+  
+     const deleteItems =   [
+      {
+        DeleteRequest: {
+          Key: { id: '1' }
         }
-      }).promise()
-      .then(() => {
-        logger.info('Items deleted', {delete: 'deleted'})
-      })
-      .catch((e) => {
-        logger.info('Failed to delete', {delete: e.message}) 
-        error = true
-      })
-
-      if (error) return true
-
-      await this.docClient.batchWrite({
-        RequestItems: {
-          'Groups-dev': [            
-            {              
-              PutRequest: {
-                Item: {
-                  "id": "1",
-                  "name": "Pets",
-                  "description": "Dogs and Cats"
-                }
-              }
-            },          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "2",
-                  "name": "Vacation",
-                  "description": "All my Vacation Pics"
-                }
-              }
-            },          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "3",
-                  "name": "Friends",
-                  "description": "All my Friends Pics"
-                }
-              }
-            },          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "4",
-                  "name": "Family",
-                  "description": "All my Family Pics"
-                }
-              }
-            },
-            ,          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "5",
-                  "name": "Stars / Adols",
-                  "description": "Singer and Movie Stars"
-                }
-              }
-            }  
-            ,          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "6",
-                  "name": "un grouped",
-                  "description": "Un-defined Pics"
-                }
-              }
-            } 
-            ,          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "7",
-                  "name": "Cars",
-                  "description": "All type of Cars"
-                }
-              }
+      },            
+      {
+        DeleteRequest: {
+          Key: { id: '2' }
+        }
+      },                        
+      {
+        DeleteRequest: {
+          Key: { id: '3' }
+        }
+      },            
+      {
+        DeleteRequest: {
+          Key: { id: '4' }
+        }
+      } 
+      ,            
+      {
+        DeleteRequest: {
+          Key: { id: '5' }
+        }
+      } 
+      ,            
+      {
+        DeleteRequest: {
+          Key: { id: '6' }
+        }
+      } 
+      ,            
+      {
+        DeleteRequest: {
+          Key: { id: '7' }
+        }
+      } 
+      ,            
+      {
+        DeleteRequest: {
+          Key: { id: '8' }
+        }
+      }                                                         
+    ]   
+  
+  
+  
+  
+     const jsonDelete =  {
+          RequestItems: {
+            [tableName]: [...deleteItems]
+          }
+        }
+  
+       await this.docClient.batchWrite(JSON.parse(JSON.stringify(jsonDelete))).promise()
+        .then(() => {
+          logger.info('Items deleted', {delete: 'deleted'})
+        })
+        .catch((e) => {
+          logger.info('Failed to delete', {delete: e.message}) 
+          error = true
+        })
+  
+        if (error) return true
+  
+  
+      const addItems = [            
+        {              
+          PutRequest: {
+            Item: {
+              "id": "1",
+              "name": "Pets",
+              "description": "Dogs and Cats"
             }
-            ,          
-            {
-              PutRequest: {
-                Item: {
-                  "id": "8",
-                  "name": "Sports",
-                  "description": "All pics related to Sports"
-                }
-              }
-            }                                               
-          ]
+          }
+        },          
+        {
+          PutRequest: {
+            Item: {
+              "id": "2",
+              "name": "Vacation",
+              "description": "All my Vacation Pics"
+            }
+          }
+        },          
+        {
+          PutRequest: {
+            Item: {
+              "id": "3",
+              "name": "Friends",
+              "description": "All my Friends Pics"
+            }
+          }
+        },          
+        {
+          PutRequest: {
+            Item: {
+              "id": "4",
+              "name": "Family",
+              "description": "All my Family Pics"
+            }
+          }
+        },
+        ,          
+        {
+          PutRequest: {
+            Item: {
+              "id": "5",
+              "name": "Stars / Adols",
+              "description": "Singer and Movie Stars"
+            }
+          }
+        }  
+        ,          
+        {
+          PutRequest: {
+            Item: {
+              "id": "6",
+              "name": "un grouped",
+              "description": "Un-defined Pics"
+            }
+          }
+        } 
+        ,          
+        {
+          PutRequest: {
+            Item: {
+              "id": "7",
+              "name": "Cars",
+              "description": "All type of Cars"
+            }
+          }
         }
-      }).promise()
-      .then(() => {
-        logger.info('Items added', {added: 'item added'})
-      })
-      .catch((e) => {
-        logger.info('Failed to add', {added: e.message}) 
-        error = true
-      })
-
-      return error
-    }   
+        ,          
+        {
+          PutRequest: {
+            Item: {
+              "id": "8",
+              "name": "Sports",
+              "description": "All pics related to Sports"
+            }
+          }
+        }                                               
+      ]  
+  
+  
+      const jsonInsert =  {
+          RequestItems: {
+            [tableName]: [...addItems]
+          }
+        }   
+  
+        await this.docClient.batchWrite(jsonInsert).promise()
+        .then(() => {
+          logger.info('Items added', {added: 'item added'})
+        })
+        .catch((e) => {
+          logger.info('Failed to add', {added: e.message}) 
+          error = true
+        })
+  
+        return error
+      } 
 
   async getAllGroups(): Promise<any> {
     const result = await this.docClient.scan({
@@ -337,6 +356,7 @@ export class GroupAccess {
 }
 
 function createDynamoDBClient() {
+  let XAWS
   if (process.env.IS_OFFLINE.toLowerCase() === "true") {
     logger.info('Creating a local DynamoDB instance', {offline: true})
     return new AWSConect.DynamoDB.DocumentClient({
@@ -344,8 +364,11 @@ function createDynamoDBClient() {
       endpoint: process.env.DYNAMODB_ENDPOINT
     })
   }
-
-  return new AWSXrayConect.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
+  else {
+    XAWS = AWSXrayConect.captureAWS(AWSConect)
+  }
+  
+  return new XAWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'})
 }
 
 function createS3Client() {

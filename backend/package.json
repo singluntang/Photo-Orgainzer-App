@@ -1,7 +1,7 @@
 {
-  "name": "serverless-udagram-app",
+  "name": "serverless-organizer-app",
   "version": "1.0.0",
-  "description": "Serverless images sharing application",
+  "description": "Serverless images organize application",
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,7 +18,6 @@
     "jimp": "^0.6.8",
     "jsonwebtoken": "^8.5.1",
     "middy": "^0.32.3",
-    "multer": "^1.4.2",
     "serverless-dynamodb-local": "^0.2.38",
     "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-offline": "^5.12.1",
