@@ -41,7 +41,7 @@ provider:
     SIGNED_URL_EXPIRATION: 1000
     THUMBNAILS_S3_BUCKET: serverless-organizer-sing-thumbnail-${self:provider.stage}
     BUCKET_REGION: ${self:provider.region}
-    IS_OFFLINE: "True" #Either True or False
+    IS_OFFLINE: "False" #Either True or False
 
 
     #################################
