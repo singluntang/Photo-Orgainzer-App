@@ -1,4 +1,4 @@
-# AWS Serverless Capstone Project - Photo Orgainzer App
+# AWS Serverless Capstone Project - Photo Orgainzer App Developed by Singlun
 
 ## Table of Contents
 
