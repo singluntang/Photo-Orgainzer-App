@@ -10,6 +10,7 @@
 - [Deploy As Offline Mode](#Deploy-As-Offline-Mode)
 - [Installation Front-End](#Installation-FrontEnd)
 - [Run the App](#Run-App)
+- [Config Auth0](#Config-Auth0)
 - [Project Reference Sources Or Links](#references)
 
 ## OverView
@@ -57,7 +58,7 @@ For this project we will uses Oracle Vitualbox Virtual Machine for simulating th
 
 - Clone the Project
   - Type in the following command to clone the Project.
-    `git clone https://github.com/singlun/serverless-photo-organizer.git`
+    `git clone https://github.com/singluntang/serverless-photo-organizer.git`
 
 And that is it! We have setup an environment for the Photo Organizer App. Next we will config the project for the Production Mode and deploy it to the AWS.
 
@@ -145,6 +146,14 @@ In Order for the system to work as Developemnt Mode. We need to modify the back-
   - For the second terminal type in the following command `sls dynamodb start`
   - FOr the third terminal. Browser to the location `serverless-photo-organizer/client` and type in the following command `npm run start`
   - In the Browser type in the URL `http://localhost:3000/dev/login`.
+
+
+## Config-Auth0
+
+* We are using Auth0 for our login services. To config Auth0 please goto the website `https://auth0.com/`. 
+    1. You just need to fill in the "domain" and "clientId". (change in the program client/src/config.ts)
+    2. For the certificate, you can find it in the advance section which is at the bottom of the menu, if everything remains the same the certificate item should be on the last tab. (change in the program "\backend\src\lambda\auth\rs256Auth0Authorizer.ts"
+    and "\backend\src\lambda\utils.ts")
 
 ## References
 
