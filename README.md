@@ -151,9 +151,9 @@ In Order for the system to work as Developemnt Mode. We need to modify the back-
 ## Config-Auth0
 
 * We are using Auth0 for our login services. To config Auth0 please goto the website `https://auth0.com/`. 
-    1. You just need to fill in the "domain" and "clientId". (change in the program client/src/config.ts)
+    1. You just need to fill in the "domain" and "clientId". (change in the program client/src/config.ts accordingly)
     2. For the certificate, you can find it in the advance section which is at the bottom of the menu, if everything remains the same the certificate item should be on the last tab. (change in the program "\backend\src\lambda\auth\rs256Auth0Authorizer.ts"
-    and "\backend\src\lambda\utils.ts")
+    and "\backend\src\lambda\utils.ts" accordingly)
 
 ## References
 
